@@ -1,0 +1,1 @@
+/* Arquivo da lógica de autenticação */

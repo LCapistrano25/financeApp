@@ -1,0 +1,1 @@
+/* Arquivo de script que contém a lógica da aplicação */

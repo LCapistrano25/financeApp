@@ -8,7 +8,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Header/Navbar */}
       <header className="flex h-16 items-center justify-end px-6">
         <button className="text-gray-400 hover:text-gray-600 transition-colors">
           <Moon size={20} fill="currentColor" />

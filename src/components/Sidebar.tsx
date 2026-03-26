@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { LogOut, Home, PieChart, Wallet, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import {User} from "@supabase/auth-js";
+import Image from "next/image";
 
 export function Sidebar() {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,7 +43,14 @@ export function Sidebar() {
 
             <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex flex-col items-center">
                 {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full mb-3 border border-gray-200 dark:border-gray-700 shadow-sm object-cover" />
+                    <Image
+                        src={avatarUrl}
+                        alt="Avatar"
+                        width={64}
+                        height={64}
+                        priority
+                        className="w-16 h-16 rounded-full mb-3 border border-gray-200 dark:border-gray-700 shadow-sm object-cover"
+                    />
                 ) : (
                     <div className="w-16 h-16 rounded-full mb-3 bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm">
                         <UserIcon size={32} className="text-gray-400" />

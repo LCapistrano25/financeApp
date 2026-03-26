@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-async function middleware(req: NextRequest) {
+async function proxy(req: NextRequest) {
     const res = NextResponse.next();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,7 +13,7 @@ async function middleware(req: NextRequest) {
                     return req.cookies.getAll();
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) =>
+                    cookiesToSet.forEach(({ name, value }) =>
                         req.cookies.set(name, value)
                     );
                     cookiesToSet.forEach(({ name, value, options }) =>
@@ -47,4 +47,4 @@ export const config = {
     matcher: ['/dashboard/:path*', '/auth/login'],
 };
 
-export default middleware;
+export default proxy;

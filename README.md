@@ -1,59 +1,77 @@
 # Finance | Controle Financeiro Mobile
 
-Finance é uma aplicação web progressiva (PWA) focada em simplicidade e privacidade. Projetado especificamente para uso em dispositivos móveis, ele permite que você gerencie suas rendas e despesas diretamente do seu navegador, utilizando o seu Google Drive pessoal como banco de dados.
+Finance V2 é a evolução da aplicação de gestão financeira pessoal, agora reconstruída com uma stack moderna e escalável. Projetado com foco total em usabilidade mobile (Thumb-First), o app combina a agilidade do Next.js com o poder de processamento do Python e a robustez do Supabase.
+
+A Evolução: Saímos de uma arquitetura baseada em arquivos JSON no Google Drive para um ecossistema completo com banco de dados relacional e inteligência artificial.
 ***
 ## Principais Funcionalidades
-**Mobile First:** Interface pensada para o uso com uma mão, com botões acessíveis e Bottom Sheets.
+**Mobile First & PWA:** Experiência de app nativo direto no navegador, com navegação inferior e Bottom Sheets para fácil uso com uma mão.
 
-**Sincronização com Google Drive:** Seus dados não ficam em servidores de terceiros; eles são salvos em um arquivo finance.json na sua própria conta Google.
+**Modo Escuro:** Interface adaptativa com persistência de tema via Tailwind CSS.
 
-**Modo Escuro:** Troca de tema inteligente com persistência de preferência.
+**Inteligência Financeira:** Motor em Python para categorização automática de transações e análise de tendências.
 
-**Inteligência Financeira:** * Replicação de rendas e despesas fixas para meses futuros.
+**Gerenciamento de Parcelas Inteligente:** Replicação automática de despesas fixas e controle de parcelamentos (ex: 1/12, 2/12) com projeção mensal.
 
-**Gerenciamento de parcelas (ex: 1/12, 2/12) automático.**
-
-**Privacidade:** Login via Google OAuth2 seguro.
+**Autenticação Segura:** Login via Supabase Auth (Suporte a Google OAuth e E-mail/Senha).
 ***
 ## Tecnologias Utilizadas
-HTML5 & CSS3: Variáveis CSS e Flexbox/Grid para layout responsivo.
+**Frontend**
+Next.js 15+ (App Router): Estrutura de rotas e performance.
 
-JavaScript (ES6+): Manipulação de DOM, Fetch API e Async/Await.
+TypeScript: Segurança de tipos e autocomplete para dados financeiros.
 
-Google Drive API v3: Persistência de dados em nuvem.
+Tailwind CSS: Estilização responsiva e utilitária.
 
-Google Identity Services: Autenticação segura.
+Lucide React: Conjunto de ícones otimizados.
+
+**Backend & Inteligência**
+Supabase: PostgreSQL (Banco de dados), Auth e Real-time.
+
+FastAPI (Python): Engine de processamento de dados e Machine Learning.
 ***
 ## Como Executar o Projeto
 ### Pré-requisitos
-1. Um Client ID do Google Cloud Console (com a API do Drive ativada).
+1. Node.js instalado.
 
-2. Adicionar http://localhost e o endereço do seu site aos "Origens JavaScript autorizadas".
+2. Ambiente Python 3.10+ (para o motor de IA).
 
-### Instalação e Uso Local
+3. Projeto configurado no Supabase.
+
+### Instalação
 1. Clone o repositório:
 
 ```Bash
-git clone https://github.com/seu-usuario/finance.git
+git clone https://github.com/LCapistrano25/financeApp
 ```
-2. Abra o arquivo js/auth.js e insira seu CLIENT_ID.
+2. Instale as dependências do Frontend:
 
-3. Para testar sem o Google Drive (Modo Debug):
+```Bash
+cd financeApp
+npm install
+```
 
-  Crie um arquivo finance.json na raiz do projeto com o conteúdo: {"months": {}}.
+3. Configure as variáveis de ambiente:
+  Crie um arquivo .env.local na raiz:
+  ```Bash
+  NEXT_PUBLIC_SUPABASE_URL=seu_url
+  NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave
+  NEXT_PUBLIC_API_URL=http://localhost:8000 # URL do FastAPI
+  ```
 
-  Execute um servidor local (ex: Live Server do VS Code) para evitar erros de CORS.
+4. Inicie o servidor de desenvolvimento:
+
+```Bash
+npm run dev
+```
 
 ## Estrutura de Arquivos
 ```Plaintext
-├── css/
-│   └── style.css      # Estilos e variáveis de tema
-├── js/
-│   ├── auth.js        # Autenticação Google
-│   ├── drive.js       # Comunicação com a API do Drive
-│   ├── storage.js     # Fallback para LocalStorage
-│   └── app.js         # Lógica de negócio e renderização
-├── app.html           # Estrutura principal
-├── index.html         # Tela de login
-└── finance.json       # (Apenas para debug local)
+src/
+├── app/              # Rotas, Layouts e Páginas (App Router)
+├── components/       # Componentes de UI e Mobile (BottomNav, Drawers)
+├── hooks/            # Lógica de estado e consumo de dados (SWR/React Query)
+├── lib/              # Configuração do Supabase e clientes de API
+├── services/         # Comunicação com o motor de IA (FastAPI)
+└── types/            # Definições de tipos TypeScript (Interfaces de Finanças)
 ```

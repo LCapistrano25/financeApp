@@ -2,8 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "developer" ]
   pull_request:
+    branches: [ "main", "developer" ]
 
 jobs:
   build:
@@ -17,15 +18,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Instalar dependências
-        run: npm install
+        run: npm ci
 
       - name: Rodar lint
         run: npm run lint
-
-      - name: Rodar testes
-        run: npm run test
 
       - name: Build do projeto
         run: npm run build

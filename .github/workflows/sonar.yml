@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 18
 
+      - name: Instalar dependências
+        run: npm ci
+
       - name: Install deps
         run: npm ci
 

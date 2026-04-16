@@ -13,7 +13,7 @@
     "@supabase/supabase-js": "^2.100.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.6.0",
-    "next": "16.2.1",
+    "next": "^16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0"
@@ -26,6 +26,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "jest": "^30.3.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

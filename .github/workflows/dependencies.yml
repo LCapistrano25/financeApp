@@ -1,10 +1,12 @@
 name: Dependencies Check
 
 on:
-    push:
-        branches: [ "main", "developer" ]
-    pull_request:
-        branches: [ "main", "developer" ]
+  push:
+    branches: [ "main", "developer" ]
+  pull_request:
+    branches: [ "main", "developer" ]
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM
 
 jobs:
   dependencies:
@@ -12,15 +14,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies (clean)
+      - name: Install dependencies
         run: npm ci
 
       - name: Check for vulnerabilities
@@ -28,6 +30,3 @@ jobs:
 
       - name: Check outdated packages
         run: npm outdated || true
-
-      - name: Build project
-        run: npm run build

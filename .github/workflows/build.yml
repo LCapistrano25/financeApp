@@ -1,4 +1,4 @@
-name: CI
+name: Build
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node
@@ -20,7 +20,7 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Instalar dependências
+      - name: Install dependencies
         run: npm ci
 
       - name: Restore Next.js build cache
@@ -32,10 +32,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
-      - name: Rodar lint
-        run: npm run lint
-
-      - name: Build do projeto
+      - name: Build project
         env:
           NEXT_TELEMETRY_DISABLED: 1
         run: npm run build

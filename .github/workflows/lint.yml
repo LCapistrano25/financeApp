@@ -1,4 +1,4 @@
-name: SonarCloud Analysis
+name: Lint
 
 on:
   push:
@@ -7,14 +7,12 @@ on:
     branches: [ "main", "developer" ]
 
 jobs:
-  sonar:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -25,7 +23,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: SonarCloud Scan
-        run: npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Run lint
+        run: npm run lint

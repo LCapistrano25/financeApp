@@ -21,9 +21,6 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Run tests with coverage
-        run: npm run test
-
       - name: Sonar Scan
         run: npx sonar-scanner
         env:

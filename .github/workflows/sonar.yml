@@ -22,6 +22,6 @@ jobs:
         run: npm ci
 
       - name: Sonar Scan
-        run: npx sonar-scanner
+        run: npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

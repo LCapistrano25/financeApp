@@ -69,14 +69,14 @@ export function Sidebar() {
                     <Home size={20} className="mr-3 text-gray-500 dark:text-gray-400 group-hover:text-[#0f172a] dark:group-hover:text-white transition-colors" />
                     <span className="font-semibold text-[13px]">Dashboard</span>
                 </a>
-                <a href="#" className="flex items-center px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#0f172a] dark:hover:text-white rounded-lg group transition-colors">
+                <button type="button" className="w-full text-left flex items-center px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#0f172a] dark:hover:text-white rounded-lg group transition-colors">
                     <Wallet size={20} className="mr-3 group-hover:text-[#0f172a] dark:group-hover:text-white transition-colors" />
                     <span className="font-semibold text-[13px]">Transações</span>
-                </a>
-                <a href="#" className="flex items-center px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#0f172a] dark:hover:text-white rounded-lg group transition-colors">
+                </button>
+                <button type="button" className="w-full text-left flex items-center px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#0f172a] dark:hover:text-white rounded-lg group transition-colors">
                     <PieChart size={20} className="mr-3 group-hover:text-[#0f172a] dark:group-hover:text-white transition-colors" />
                     <span className="font-semibold text-[13px]">Relatórios</span>
-                </a>
+                </button>
             </nav>
 
             <div className="p-4 border-t border-gray-200 dark:border-gray-800">

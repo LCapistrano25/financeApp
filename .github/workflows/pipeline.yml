@@ -124,8 +124,10 @@ jobs:
           npx wait-on http://localhost:3000 --timeout 60000
       - name: 🔍 Run OWASP ZAP baseline scan
         run: |
+          chmod -R 777 $(pwd)
           docker run --network="host" \
             -v $(pwd):/zap/wrk/:rw \
+            -u $(id -u):$(id -g) \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
             -t http://localhost:3000 \

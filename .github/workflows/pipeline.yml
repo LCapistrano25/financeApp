@@ -122,11 +122,8 @@ jobs:
           npx wait-on http://localhost:3000 --timeout 60000
       - name: 🔍 Run OWASP ZAP baseline scan
         run: |
-          # Criar os arquivos antes para garantir permissão de escrita pelo container
-          touch zap-report.html zap-report.json
-          chmod 777 zap-report.html zap-report.json
-          
           docker run --network="host" \
+            --user root \
             -v $(pwd):/zap/wrk/:rw \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \

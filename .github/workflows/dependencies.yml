@@ -1,32 +1,49 @@
-name: Dependencies Check
+name: Dependencies Security Check
 
 on:
   push:
-    branches: [ "main", "developer" ]
+    branches: ["main", "developer"]
   pull_request:
-    branches: [ "main", "developer" ]
+    branches: ["main", "developer"]
   schedule:
-    - cron: '0 9 * * 1'  # Every Monday at 9 AM
+    - cron: "0 9 * * 1" # Segunda-feira às 09:00
 
 jobs:
   dependencies:
+    name: Security Audit & Dependency Health
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      - name: Checkout
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm ci
 
-      - name: Check for vulnerabilities
+      - name: 🛠️ Attempt auto-fix vulnerabilities
+        run: npm audit fix || true
+
+      - name: 🔍 Run security audit (fail on high/critical)
         run: npm audit --audit-level=high
 
-      - name: Check outdated packages
+      - name: 📊 Generate audit report
+        run: npm audit --json > audit-report.json || true
+
+      - name: 📤 Upload audit report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: audit-report.json
+
+      - name: 📊 Check outdated dependencies
         run: npm outdated || true

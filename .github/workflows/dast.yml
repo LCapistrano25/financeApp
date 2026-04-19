@@ -1,0 +1,63 @@
+name: DAST Security Scan
+
+on:
+  push:
+    branches: ["main", "developer"]
+  pull_request:
+    branches: ["main", "developer"]
+
+jobs:
+  dast:
+    name: Dynamic Application Security Testing
+    runs-on: ubuntu-latest
+
+    services:
+      web:
+        image: node:20
+        ports:
+          - 3000:3000
+        options: >-
+          --health-cmd="curl -f http://localhost:3000 || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build application
+        run: npm run build
+
+      - name: 🚀 Start application
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000
+
+      - name: 🔍 Run OWASP ZAP baseline scan
+        run: |
+          docker run --network="host" \
+            -v $(pwd):/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://localhost:3000 \
+            -g gen.conf \
+            -r zap-report.html \
+            -J zap-report.json
+
+      - name: 📤 Upload ZAP Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-report
+          path: |
+            zap-report.html
+            zap-report.json

@@ -127,10 +127,10 @@ jobs:
             -v $(pwd):/zap/wrk/:rw \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            -t http://localhost:3000/vulnerable \
+            -t http://localhost:3000 \
             -r zap-report.html \
             -J zap-report.json
-        continue-on-error: true # Mantemos true para o upload do artefato acontecer, mas o relatório mostrará os erros
+        continue-on-error: true
       - name: 📤 Upload ZAP Report
         uses: actions/upload-artifact@v4
         if: always()

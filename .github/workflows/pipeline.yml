@@ -60,16 +60,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
       - run: npm run build
+      - name: Check build output
+        run: ls -la .next
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
           path: .next/
+          if-no-files-found: error
 
   # 3. Análises Avançadas (em paralelo após o build)
   sonar:
     name: 📊 SonarCloud Analysis
     needs: build
+    if: success()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -88,6 +92,7 @@ jobs:
   dast:
     name: 🔍 DAST Security Scan (ZAP)
     needs: build
+    if: success()
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -102,6 +107,8 @@ jobs:
         with:
           name: build-artifact
           path: .next/
+      - name: Verify Downloaded Artifact
+        run: ls -la .next
       - name: 🚀 Start application
         run: |
           npm start &

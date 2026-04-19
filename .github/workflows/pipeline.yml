@@ -75,6 +75,7 @@ jobs:
         with:
           name: build-artifact
           path: .next
+          include-hidden-files: true
           if-no-files-found: error
 
   # 3. Análises Avançadas (em paralelo após o build)

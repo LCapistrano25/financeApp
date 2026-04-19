@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -6,16 +6,15 @@ on:
   pull_request:
     branches: ["main", "developer"]
   schedule:
-    - cron: "0 9 * * 1" # Segunda-feira às 09:00 (para auditoria de dependências)
+    - cron: "0 9 * * 1"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # 1. Qualidade e Segurança Inicial
   lint:
-    name: ⬢ Lint & Type Check
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +26,7 @@ jobs:
       - run: npm run lint
 
   security_audit:
-    name: 🛡️ Dependency Audit
+    name: Dependency
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +40,7 @@ jobs:
 
   # 2. Build da Aplicação
   build:
-    name: 🏗️ Build Application
+    name: Build Application
     needs: [lint, security_audit]
     runs-on: ubuntu-latest
     steps:
@@ -78,9 +77,8 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
-  # 3. Análises Avançadas (em paralelo após o build)
   sonar:
-    name: 📊 SonarCloud Analysis
+    name: SonarCloud
     needs: build
     if: success()
     runs-on: ubuntu-latest
@@ -125,15 +123,15 @@ jobs:
       - name: 🔍 Run OWASP ZAP baseline scan
         run: |
           chmod -R 777 $(pwd)
+          # Removendo o continue-on-error para o pipeline falhar se encontrar erros
           docker run --network="host" \
             -v $(pwd):/zap/wrk/:rw \
             -u $(id -u):$(id -g) \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            -t http://localhost:3000 \
+            -t http://localhost:3000/vulnerable \
             -r zap-report.html \
             -J zap-report.json
-        continue-on-error: true
       - name: 📤 Upload ZAP Report
         uses: actions/upload-artifact@v4
         if: always()

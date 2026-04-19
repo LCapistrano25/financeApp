@@ -60,13 +60,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
       - run: npm run build
-      - name: Check build output
-        run: ls -la .next
+      - name: Debug build output
+        run: |
+          echo "Checking for .next directory:"
+          if [ -d ".next" ]; then
+            echo ".next exists. Listing contents:"
+            ls -la .next
+          else
+            echo ".next DOES NOT exist. Listing current root:"
+            ls -F
+          fi
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
-          path: .next/
+          path: .next
           if-no-files-found: error
 
   # 3. Análises Avançadas (em paralelo após o build)
@@ -106,7 +114,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
-          path: .next/
+          path: .next
       - name: Verify Downloaded Artifact
         run: ls -la .next
       - name: 🚀 Start application

@@ -38,11 +38,97 @@ const IconComponent = ({ name, ...props }: { name: string, [key: string]: unknow
     car: Car,
     landmark: Landmark,
     bookmark: Bookmark,
-    wallet: Landmark, // Default for wallet
+    wallet: Landmark,
   };
   const Icon = icons[name.toLowerCase()] || Bookmark;
   return <Icon {...props} />;
 };
+
+interface ToggleProps {
+  label: string;
+  icon: React.ElementType;
+  value: boolean;
+  onChange: (val: boolean) => void;
+  activeColor?: string;
+}
+
+const ToggleField = ({ label, icon: Icon, value, onChange, activeColor = "bg-[#ef4444]" }: ToggleProps) => (
+  <div className="flex items-center justify-between border-b border-white/10 pb-4 last:border-0 last:pb-0">
+    <div className="flex items-center gap-3">
+      <Icon size={20} className={cn("transition-colors", value ? "text-[#ef4444]" : "text-gray-400")} />
+      <span className="text-gray-200">{label}</span>
+    </div>
+    <button 
+      onClick={() => onChange(!value)}
+      className={cn(
+        "relative h-6 w-11 rounded-full transition-colors outline-none",
+        value ? activeColor : "bg-gray-600"
+      )}
+    >
+      <div className={cn(
+        "absolute top-1 h-4 w-4 rounded-full bg-white transition-all shadow-sm",
+        value ? "left-6" : "left-1"
+      )} />
+    </button>
+  </div>
+);
+
+interface SelectorProps<T> {
+  label: string;
+  icon: React.ElementType;
+  value: T | null;
+  options: T[];
+  isOpen: boolean;
+  onToggle: () => void;
+  onSelect: (val: T) => void;
+  renderOption: (val: T) => React.ReactNode;
+}
+
+const SelectorField = <T extends { id: string, name: string, color: string, icon: string }>({ 
+  icon: Icon, 
+  value, 
+  options, 
+  isOpen, 
+  onToggle, 
+  onSelect,
+  renderOption
+}: SelectorProps<T>) => (
+  <div className="relative border-b border-white/10 pb-4">
+    <div 
+      onClick={onToggle}
+      className="flex items-center justify-between cursor-pointer hover:bg-white/5 px-2 -mx-2 rounded transition-colors"
+    >
+      <div className="flex items-center gap-3">
+        <Icon size={20} className="text-gray-400" />
+        {value ? (
+          <div className="flex items-center gap-2 rounded-full px-3 py-1 border" style={{ backgroundColor: `${value.color}20`, borderColor: `${value.color}30` }}>
+            <IconComponent name={value.icon} size={16} style={{ color: value.color }} />
+            <span className="text-sm font-medium" style={{ color: value.color }}>{value.name}</span>
+          </div>
+        ) : (
+          <span className="text-gray-500">Selecionar...</span>
+        )}
+      </div>
+      <ChevronDown size={20} className={cn("text-gray-400 transition-transform", isOpen && "rotate-180")} />
+    </div>
+
+    {isOpen && (
+      <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-xl bg-[#2a2a2a] p-2 shadow-xl border border-white/10">
+        {options.length > 0 ? options.map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => onSelect(opt)}
+            className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-white/5 transition-colors"
+          >
+            {renderOption(opt)}
+          </button>
+        )) : (
+          <div className="p-3 text-sm text-gray-500 text-center">Nenhum item encontrado</div>
+        )}
+      </div>
+    )}
+  </div>
+);
 
 export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
   const [amount, setAmount] = useState('0,00');
@@ -207,24 +293,12 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
             </div>
 
             {/* Paid Toggle */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                  <CheckCircle size={20} className={cn("transition-colors", isPaid ? "text-[#ef4444]" : "text-gray-400")} />
-                  <span className="text-gray-200">Foi paga</span>
-                </div>
-              <button 
-                    onClick={() => setIsPaid(!isPaid)}
-                    className={cn(
-                      "relative h-6 w-11 rounded-full transition-colors outline-none",
-                      isPaid ? "bg-[#ef4444]" : "bg-gray-600"
-                    )}
-                  >
-                    <div className={cn(
-                      "absolute top-1 h-4 w-4 rounded-full bg-white transition-all shadow-sm",
-                      isPaid ? "left-6" : "left-1"
-                    )} />
-                  </button>
-            </div>
+            <ToggleField 
+              label="Foi paga" 
+              icon={CheckCircle} 
+              value={isPaid} 
+              onChange={setIsPaid} 
+            />
 
             {/* Date Selector */}
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -262,86 +336,44 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
             </div>
 
             {/* Category Selector */}
-            <div className="relative">
-              <div 
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                className="flex items-center justify-between border-b border-white/10 pb-4 cursor-pointer hover:bg-white/5 px-2 -mx-2 rounded transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Bookmark size={20} className="text-gray-400" />
-                  {category ? (
-                    <div className="flex items-center gap-2 rounded-full px-3 py-1 border" style={{ backgroundColor: `${category.color}20`, borderColor: `${category.color}30` }}>
-                      <IconComponent name={category.icon} size={16} style={{ color: category.color }} />
-                      <span className="text-sm font-medium" style={{ color: category.color }}>{category.name}</span>
-                    </div>
-                  ) : (
-                    <span className="text-gray-500">Selecionar categoria</span>
-                  )}
-                </div>
-                <ChevronDown size={20} className={cn("text-gray-400 transition-transform", isCategoryOpen && "rotate-180")} />
-              </div>
-
-              {isCategoryOpen && (
-                <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-xl bg-[#2a2a2a] p-2 shadow-xl border border-white/10">
-                  {categories.length > 0 ? categories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setCategory(cat);
-                        setIsCategoryOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-white/5 transition-colors"
-                    >
-                      <IconComponent name={cat.icon} size={18} style={{ color: cat.color }} />
-                      <span className="text-sm text-gray-200">{cat.name}</span>
-                    </button>
-                  )) : (
-                    <div className="p-3 text-sm text-gray-500 text-center">Nenhuma categoria encontrada</div>
-                  )}
-                </div>
+            <SelectorField<Category>
+              label="Categoria"
+              icon={Bookmark}
+              value={category}
+              options={categories}
+              isOpen={isCategoryOpen}
+              onToggle={() => setIsCategoryOpen(!isCategoryOpen)}
+              onSelect={(cat) => {
+                setCategory(cat);
+                setIsCategoryOpen(false);
+              }}
+              renderOption={(cat) => (
+                <>
+                  <IconComponent name={cat.icon} size={18} style={{ color: cat.color }} />
+                  <span className="text-sm text-gray-200">{cat.name}</span>
+                </>
               )}
-            </div>
+            />
 
             {/* Account Selector */}
-            <div className="relative">
-              <div 
-                onClick={() => setIsAccountOpen(!isAccountOpen)}
-                className="flex items-center justify-between border-b border-white/10 pb-4 cursor-pointer hover:bg-white/5 px-2 -mx-2 rounded transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Landmark size={20} className="text-gray-400" />
-                  {account ? (
-                    <div className="flex items-center gap-2 rounded-full px-3 py-1 border" style={{ backgroundColor: `${account.color}20`, borderColor: `${account.color}30` }}>
-                      <IconComponent name={account.icon} size={16} style={{ color: account.color }} />
-                      <span className="text-sm font-medium" style={{ color: account.color }}>{account.name}</span>
-                    </div>
-                  ) : (
-                    <span className="text-gray-500">Selecionar conta</span>
-                  )}
-                </div>
-                <ChevronDown size={20} className={cn("text-gray-400 transition-transform", isAccountOpen && "rotate-180")} />
-              </div>
-
-              {isAccountOpen && (
-                <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-xl bg-[#2a2a2a] p-2 shadow-xl border border-white/10">
-                  {accounts.length > 0 ? accounts.map((acc) => (
-                    <button
-                      key={acc.id}
-                      onClick={() => {
-                        setAccount(acc);
-                        setIsAccountOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-white/5 transition-colors"
-                    >
-                      <IconComponent name={acc.icon} size={18} style={{ color: acc.color }} />
-                      <span className="text-sm text-gray-200">{acc.name}</span>
-                    </button>
-                  )) : (
-                    <div className="p-3 text-sm text-gray-500 text-center">Nenhuma conta encontrada</div>
-                  )}
-                </div>
+            <SelectorField<Account>
+              label="Conta"
+              icon={Landmark}
+              value={account}
+              options={accounts}
+              isOpen={isAccountOpen}
+              onToggle={() => setIsAccountOpen(!isAccountOpen)}
+              onSelect={(acc) => {
+                setAccount(acc);
+                setIsAccountOpen(false);
+              }}
+              renderOption={(acc) => (
+                <>
+                  <IconComponent name={acc.icon} size={18} style={{ color: acc.color }} />
+                  <span className="text-sm text-gray-200">{acc.name}</span>
+                </>
               )}
-            </div>
+            />
 
             {/* Attach File */}
             <div className="flex items-center gap-3 py-2 cursor-pointer hover:text-white text-gray-400 transition-colors">
@@ -350,24 +382,12 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
             </div>
 
             {/* Ignore Transaction */}
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <Info size={20} className="text-gray-400" />
-                <span className="text-sm text-gray-200">Ignorar transação</span>
-              </div>
-              <button 
-                onClick={() => setIgnoreTransaction(!ignoreTransaction)}
-                className={cn(
-                  "relative h-5 w-9 rounded-full transition-colors outline-none",
-                  ignoreTransaction ? "bg-[#ef4444]" : "bg-gray-600"
-                )}
-              >
-                <div className={cn(
-                  "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all shadow-sm",
-                  ignoreTransaction ? "left-4.5" : "left-0.5"
-                )} />
-              </button>
-            </div>
+            <ToggleField 
+              label="Ignorar transação" 
+              icon={Info} 
+              value={ignoreTransaction} 
+              onChange={setIgnoreTransaction} 
+            />
 
             {/* Toggle Details */}
             <div className="flex justify-center pt-2">
@@ -397,45 +417,21 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
               </div>
 
               {/* Fixed Expense */}
-              <div className="flex items-center justify-between py-2">
-                <div className="flex items-center gap-3">
-                  <Pin size={20} className="text-gray-400" />
-                  <span className="text-gray-200">Despesa fixa</span>
-                </div>
-                <button 
-                  onClick={() => setIsFixed(!isFixed)}
-                  className={cn(
-                    "relative h-5 w-9 rounded-full transition-colors outline-none",
-                    isFixed ? "bg-[#ef4444]" : "bg-gray-600"
-                  )}
-                >
-                  <div className={cn(
-                    "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all shadow-sm",
-                    isFixed ? "left-4.5" : "left-0.5"
-                  )} />
-                </button>
-              </div>
+              <ToggleField 
+                label="Despesa fixa" 
+                icon={Pin} 
+                value={isFixed} 
+                onChange={setIsFixed} 
+              />
 
               {/* Repeat */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-3">
-                    <RefreshCw size={20} className="text-gray-400" />
-                    <span className="text-gray-200">Repetir</span>
-                  </div>
-                  <button 
-                    onClick={() => setRepeat(!repeat)}
-                    className={cn(
-                      "relative h-5 w-9 rounded-full transition-colors outline-none",
-                      repeat ? "bg-[#ef4444]" : "bg-gray-600"
-                    )}
-                  >
-                    <div className={cn(
-                      "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all shadow-sm",
-                      repeat ? "left-4.5" : "left-0.5"
-                    )} />
-                  </button>
-                </div>
+                <ToggleField 
+                  label="Repetir" 
+                  icon={RefreshCw} 
+                  value={repeat} 
+                  onChange={setRepeat} 
+                />
 
                 {repeat && (
                   <div className="flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-200">

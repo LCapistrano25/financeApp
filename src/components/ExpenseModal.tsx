@@ -29,11 +29,11 @@ function cn(...inputs: ClassValue[]) {
 }
 
 interface ExpenseModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
 }
 
-const IconComponent = ({ name, ...props }: { name: string, [key: string]: unknown }) => {
+const IconComponent = ({ name, ...props }: { readonly name: string, [key: string]: unknown }) => {
   const icons: { [key: string]: React.ElementType } = {
     car: Car,
     landmark: Landmark,
@@ -45,11 +45,11 @@ const IconComponent = ({ name, ...props }: { name: string, [key: string]: unknow
 };
 
 interface ToggleProps {
-  label: string;
-  icon: React.ElementType;
-  value: boolean;
-  onChange: (val: boolean) => void;
-  activeColor?: string;
+  readonly label: string;
+  readonly icon: React.ElementType;
+  readonly value: boolean;
+  readonly onChange: (val: boolean) => void;
+  readonly activeColor?: string;
 }
 
 const ToggleField = ({ label, icon: Icon, value, onChange, activeColor = "bg-[#ef4444]" }: ToggleProps) => (
@@ -59,11 +59,13 @@ const ToggleField = ({ label, icon: Icon, value, onChange, activeColor = "bg-[#e
       <span className="text-gray-200">{label}</span>
     </div>
     <button 
+      type="button"
       onClick={() => onChange(!value)}
       className={cn(
-        "relative h-6 w-11 rounded-full transition-colors outline-none",
+        "relative h-6 w-11 rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#ef4444]",
         value ? activeColor : "bg-gray-600"
       )}
+      aria-pressed={value}
     >
       <div className={cn(
         "absolute top-1 h-4 w-4 rounded-full bg-white transition-all shadow-sm",
@@ -74,14 +76,13 @@ const ToggleField = ({ label, icon: Icon, value, onChange, activeColor = "bg-[#e
 );
 
 interface SelectorProps<T> {
-  label: string;
-  icon: React.ElementType;
-  value: T | null;
-  options: T[];
-  isOpen: boolean;
-  onToggle: () => void;
-  onSelect: (val: T) => void;
-  renderOption: (val: T) => React.ReactNode;
+  readonly icon: React.ElementType;
+  readonly value: T | null;
+  readonly options: T[];
+  readonly isOpen: boolean;
+  readonly onToggle: () => void;
+  readonly onSelect: (val: T) => void;
+  readonly renderOption: (val: T) => React.ReactNode;
 }
 
 const SelectorField = <T extends { id: string, name: string, color: string, icon: string }>({ 
@@ -95,8 +96,18 @@ const SelectorField = <T extends { id: string, name: string, color: string, icon
 }: SelectorProps<T>) => (
   <div className="relative border-b border-white/10 pb-4">
     <div 
+      role="button"
+      tabIndex={0}
       onClick={onToggle}
-      className="flex items-center justify-between cursor-pointer hover:bg-white/5 px-2 -mx-2 rounded transition-colors"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      aria-haspopup="listbox"
+      aria-expanded={isOpen}
+      className="flex items-center justify-between cursor-pointer hover:bg-white/5 px-2 -mx-2 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444]"
     >
       <div className="flex items-center gap-3">
         <Icon size={20} className="text-gray-400" />
@@ -113,12 +124,17 @@ const SelectorField = <T extends { id: string, name: string, color: string, icon
     </div>
 
     {isOpen && (
-      <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-xl bg-[#2a2a2a] p-2 shadow-xl border border-white/10">
+      <div 
+        role="listbox"
+        className="absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-xl bg-[#2a2a2a] p-2 shadow-xl border border-white/10"
+      >
         {options.length > 0 ? options.map((opt) => (
           <button
             key={opt.id}
+            role="option"
+            aria-selected={value?.id === opt.id}
             onClick={() => onSelect(opt)}
-            className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-white/5 transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-white/5 transition-colors focus-visible:bg-white/5 focus-visible:outline-none"
           >
             {renderOption(opt)}
           </button>
@@ -199,9 +215,9 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
   const handleSave = async () => {
     try {
       // Parse amount
-      const numericAmount = parseFloat(amount.replace(/\./g, '').replace(',', '.'));
+      const numericAmount = Number.parseFloat(amount.replaceAll('.', '').replace(',', '.'));
       
-      if (isNaN(numericAmount) || numericAmount === 0) {
+      if (Number.isNaN(numericAmount) || numericAmount === 0) {
         alert('Por favor, insira um valor válido maior que 0');
         return;
       }

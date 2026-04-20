@@ -353,7 +353,6 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
 
             {/* Category Selector */}
             <SelectorField<Category>
-              label="Categoria"
               icon={Bookmark}
               value={category}
               options={categories}
@@ -373,7 +372,6 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
 
             {/* Account Selector */}
             <SelectorField<Account>
-              label="Conta"
               icon={Landmark}
               value={account}
               options={accounts}

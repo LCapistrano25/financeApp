@@ -15,7 +15,6 @@ import {
   Heart, 
   ChevronDown, 
   ChevronLeft,
-  Tag,
   Pin,
   RefreshCw,
   Car
@@ -34,7 +33,7 @@ interface ExpenseModalProps {
   onClose: () => void;
 }
 
-const IconComponent = ({ name, ...props }: { name: string, [key: string]: any }) => {
+const IconComponent = ({ name, ...props }: { name: string, [key: string]: unknown }) => {
   const icons: { [key: string]: React.ElementType } = {
     car: Car,
     landmark: Landmark,
@@ -61,7 +60,7 @@ export default function ExpenseModal({ isOpen, onClose }: ExpenseModalProps) {
   const [isFixed, setIsFixed] = useState(false);
   const [repeat, setRepeat] = useState(false);
   const [repeatTimes, setRepeatTimes] = useState(2);
-  const [repeatFrequency, setRepeatFrequency] = useState('Meses');
+  const [repeatFrequency] = useState('Meses');
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);

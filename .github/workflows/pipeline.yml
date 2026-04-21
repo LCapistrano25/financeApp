@@ -97,7 +97,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   dast:
-    name: 🔍 DAST Security Scan (ZAP)
+    name: DAST Security Scan (ZAP)
     needs: build
     if: success()
     runs-on: ubuntu-latest

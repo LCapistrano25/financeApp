@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { Calendar, Moon } from "lucide-react";
 import ExpenseModal from "@/components/ExpenseModal";
+import IncomeModal from "@/components/IncomeModal";
 
 export default function DashboardPage() {
   const [referenceDate] = useState("janeiro de 2026");
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col flex-1">
@@ -50,7 +52,10 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-8">
-          <button className="flex h-12 items-center justify-center rounded-xl bg-[#10b981] text-white hover:bg-[#059669] transition-colors shadow-sm font-bold text-xl">
+          <button 
+            onClick={() => setIsIncomeModalOpen(true)}
+            className="flex h-12 items-center justify-center rounded-xl bg-[#10b981] text-white hover:bg-[#059669] transition-colors shadow-sm font-bold text-xl"
+          >
             +
           </button>
           <button 
@@ -64,6 +69,11 @@ export default function DashboardPage() {
         <ExpenseModal 
           isOpen={isExpenseModalOpen} 
           onClose={() => setIsExpenseModalOpen(false)} 
+        />
+
+        <IncomeModal 
+          isOpen={isIncomeModalOpen} 
+          onClose={() => setIsIncomeModalOpen(false)} 
         />
 
         <div className="space-y-6">

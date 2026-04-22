@@ -1,160 +1,94 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-    LogOut,
-    Home,
-    PieChart,
-    Wallet,
-    User as UserIcon,
-    ChevronRight,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
-import { User } from "@supabase/auth-js";
+import { useState, useEffect } from "react";
+import { LogOut, Moon, Sun, User as UserIcon, Menu, X } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth"; 
 import Image from "next/image";
+import { useTheme } from "next-themes";
 
 export function Sidebar() {
-    const [user, setUser] = useState<User | null>(null);
+    const [mounted, setMounted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const router = useRouter();
-
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-    );
+    const { user, logout } = useAuth();
+    const { setTheme, resolvedTheme } = useTheme();
 
     useEffect(() => {
-        const getUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) setUser(session.user);
-        };
-        getUser();
+        setMounted(true);
     }, []);
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.push("/auth/login");
-        router.refresh();
-    };
 
     const avatarUrl = user?.user_metadata?.avatar_url;
     const fullName = user?.user_metadata?.full_name || "Usuário";
     const email = user?.email || "";
 
-    const menuItems = [
-        { icon: Home, label: "Dashboard", href: "/dashboard" },
-        { icon: Wallet, label: "Transações", href: "#" },
-        { icon: PieChart, label: "Relatórios", href: "#" },
-    ];
+    // Descobrimos se está escuro (com fallback seguro para evitar hidratação errada)
+    const isDark = mounted && resolvedTheme === "dark";
 
     return (
-        <aside
-            className={`
-                ${isOpen ? "w-64" : "w-20"}
-                bg-white dark:bg-[#111827]
-                h-screen
-                border-r border-gray-200 dark:border-gray-800
-                transition-all duration-300
-                flex flex-col
-            `}
-        >
-            {/* HEADER */}
-            <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
-                {isOpen && (
-                    <span className="font-bold text-lg">Finance</span>
-                )}
-
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                    <ChevronRight
-                        className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
-                    />
+        <>
+            {/* ... Gatilho e Overlay continuam exatamentes iguais ... */}
+            <div className="fixed top-0 left-0 w-full h-16 flex items-center px-4 bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 z-30">
+                <button onClick={() => setIsOpen(true)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+                    <Menu size={24} />
                 </button>
+                <span className="ml-4 font-bold text-xl tracking-tight">Finance</span>
             </div>
 
-            {/* USER */}
-            <div className="p-4 flex flex-col items-center border-b border-gray-200 dark:border-gray-800">
-                {avatarUrl ? (
-                    <Image
-                        src={avatarUrl}
-                        alt="Avatar"
-                        width={48}
-                        height={48}
-                        className="rounded-full"
-                    />
-                ) : (
-                    <div className="w-12 h-12 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full">
-                        <UserIcon />
+            <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"}`} onClick={() => setIsOpen(false)} />
+
+            <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-[#0f172a] shadow-2xl border-r border-gray-200 dark:border-slate-800 transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+                
+                {/* ... Header e User Info iguais ... */}
+                <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100 dark:border-slate-800">
+                    <span className="font-bold text-lg">Menu</span>
+                    <button onClick={() => setIsOpen(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="p-6 flex flex-col items-center">
+                    <div className="relative w-20 h-20 mb-4 shadow-lg rounded-full overflow-hidden border-2 border-emerald-500/20">
+                        {avatarUrl ? (
+                            <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-slate-800">
+                                <UserIcon size={32} className="text-gray-400" />
+                            </div>
+                        )}
                     </div>
-                )}
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{fullName}</h3>
+                    <p className="text-sm text-slate-500 truncate max-w-full">{email}</p>
+                </div>
 
-                {isOpen && (
-                    <>
-                        <span className="mt-2 text-sm font-semibold text-center">
-                            {fullName}
+                {/* --- NAV LINKS CORRIGIDO --- */}
+                <nav className="flex-1 px-4 py-2 space-y-1">
+                    {/* Botão Único de Alternar Tema */}
+                    <button
+                        onClick={() => {
+                            setTheme(isDark ? "light" : "dark");
+                            // Se quiser fechar a sidebar ao trocar de tema, descomente a linha abaixo:
+                            // setIsOpen(false); 
+                        }}
+                        className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                    >
+                        {isDark ? (
+                            <Sun size={22} className="group-hover:scale-110 transition-transform text-amber-500" />
+                        ) : (
+                            <Moon size={22} className="group-hover:scale-110 transition-transform text-blue-500" />
+                        )}
+                        <span className="font-medium">
+                            {isDark ? "Modo Claro" : "Modo Escuro"}
                         </span>
-                        <span className="text-xs text-gray-500 text-center">
-                            {email}
-                        </span>
-                    </>
-                )}
-            </div>
+                    </button>
+                </nav>
 
-            {/* MENU */}
-            <nav className="flex-1 p-2 space-y-1">
-                {menuItems.map((item, index) => {
-                    const Icon = item.icon;
-
-                    return (
-                        <a
-                            key={index}
-                            href={item.href}
-                            className="relative group flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                        >
-                            <Icon className="min-w-[20px]" />
-
-                            {/* LABEL */}
-                            {isOpen && (
-                                <span className="ml-3 text-sm font-medium">
-                                    {item.label}
-                                </span>
-                            )}
-
-                            {/* TOOLTIP */}
-                            {!isOpen && (
-                                <span className="absolute left-full ml-3 whitespace-nowrap rounded bg-black text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-                                    {item.label}
-                                </span>
-                            )}
-                        </a>
-                    );
-                })}
-            </nav>
-
-            {/* LOGOUT */}
-            <div className="p-2 border-t border-gray-200 dark:border-gray-800">
-                <button
-                    onClick={handleLogout}
-                    className="relative group flex items-center w-full p-3 rounded-lg hover:bg-red-50 dark:hover:bg-gray-800 text-red-600"
-                >
-                    <LogOut />
-
-                    {isOpen && (
-                        <span className="ml-3 text-sm font-semibold">
-                            Sair
-                        </span>
-                    )}
-
-                    {!isOpen && (
-                        <span className="absolute left-full ml-3 whitespace-nowrap rounded bg-black text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                            Sair
-                        </span>
-                    )}
-                </button>
-            </div>
-        </aside>
+                {/* LOGOUT */}
+                <div className="p-4 border-t border-gray-100 dark:border-slate-800">
+                    <button onClick={logout} className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors font-semibold">
+                        <LogOut size={22} />
+                        Sair da conta
+                    </button>
+                </div>
+            </aside>
+        </>
     );
 }

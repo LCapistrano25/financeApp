@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/types";
@@ -33,7 +33,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
 
   const [isLoading, setIsLoading] = useState(false);
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
 
@@ -73,15 +73,24 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     }
   };
 
+  const submitButtonContent = isLoading ? (
+    <Loader2 className="animate-spin" />
+  ) : isEditing ? (
+    "Guardar Alterações"
+  ) : (
+    `Confirmar ${type === "INCOME" ? "Receita" : "Despesa"}`
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="text-center py-4">
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <label htmlFor="amount" className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
           Valor da {type === 'INCOME' ? 'Receita' : 'Despesa'}
-        </span>
+        </label>
         <div className="flex items-center justify-center gap-2 mt-1">
           <span className="text-2xl font-bold text-slate-400">R$</span>
           <input 
+            id="amount"
             type="number" 
             step="0.01"
             required
@@ -96,8 +105,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
       <div className="space-y-3">
         <div>
-          <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Título</label>
+          <label htmlFor="title" className="text-xs font-bold text-slate-400 ml-1 uppercase">Título</label>
           <input 
+            id="title"
             type="text" 
             required
             placeholder="Ex: Aluguel, Salário..." 
@@ -109,8 +119,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Data</label>
+            <label htmlFor="date" className="text-xs font-bold text-slate-400 ml-1 uppercase">Data</label>
             <input 
+              id="date"
               type="date" 
               required
               value={date}
@@ -119,7 +130,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Status</label>
+            <span className="text-xs font-bold text-slate-400 ml-1 uppercase block mb-1">Status</span>
             <button 
               type="button" 
               onClick={() => setIsPaid(!isPaid)}
@@ -139,7 +150,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         type="submit" 
         className={`w-full flex justify-center items-center gap-2 p-4 rounded-2xl font-bold text-white shadow-lg transition-transform active:scale-95 mt-4 ${type === 'INCOME' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-red-500 shadow-red-500/20'} disabled:opacity-50`}
       >
-        {isLoading ? <Loader2 className="animate-spin" /> : (isEditing ? "Guardar Alterações" : `Confirmar ${type === 'INCOME' ? 'Receita' : 'Despesa'}`)}
+        {submitButtonContent}
       </button>
     </form>
   );

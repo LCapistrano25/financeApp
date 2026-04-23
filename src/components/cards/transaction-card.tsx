@@ -17,6 +17,14 @@ export function TransactionCard({ title, category, amount, type, onClick }: Tran
   return (
     <div 
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className="bg-white dark:bg-slate-800 p-4 rounded-2xl mb-3 flex justify-between items-center border border-gray-100 dark:border-slate-700 shadow-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-colors"
     >
       <div className="flex flex-col gap-1">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider"; // Importe o provider
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Finance",
-  description: "",
+  description: "Seu app de finanças pessoais",
 };
 
 export default function RootLayout({
@@ -24,10 +25,24 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
+      suppressHydrationWarning 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/* ADICIONADO O suppressHydrationWarning AQUI TAMBÉM */}
+      <body 
+        suppressHydrationWarning 
+        className="min-h-full bg-white dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors duration-300"
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

@@ -91,6 +91,8 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
+      - name: Run Tests with Coverage
+        run: npm run test:coverage
       - name: SonarCloud Scan
         run: npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
         env:

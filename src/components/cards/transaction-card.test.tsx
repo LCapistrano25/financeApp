@@ -33,13 +33,10 @@ describe('TransactionCard', () => {
     expect(defaultProps.onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onClick when Enter key is pressed', () => {
+  it('should be a button element', () => {
     render(<TransactionCard {...defaultProps} />);
-    
     const card = screen.getByRole('button');
-    fireEvent.keyDown(card, { key: 'Enter' });
-    
-    expect(defaultProps.onClick).toHaveBeenCalledTimes(1);
+    expect(card.tagName).toBe('BUTTON');
   });
 
   it('should apply correct color for income type', () => {

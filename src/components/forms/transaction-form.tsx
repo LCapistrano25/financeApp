@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import * as React from "react";
+import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/types";
@@ -33,7 +34,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
 
@@ -73,19 +74,21 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     }
   };
 
+  const transactionTypeName = type === "INCOME" ? "Receita" : "Despesa";
+
   const submitButtonContent = isLoading ? (
     <Loader2 className="animate-spin" />
   ) : isEditing ? (
     "Guardar Alterações"
   ) : (
-    `Confirmar ${type === "INCOME" ? "Receita" : "Despesa"}`
+    `Confirmar ${transactionTypeName}`
   );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="text-center py-4">
         <label htmlFor="amount" className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-          Valor da {type === 'INCOME' ? 'Receita' : 'Despesa'}
+          Valor da {transactionTypeName}
         </label>
         <div className="flex items-center justify-center gap-2 mt-1">
           <span className="text-2xl font-bold text-slate-400">R$</span>

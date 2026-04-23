@@ -28,6 +28,8 @@ interface IncomeModalProps {
   readonly onClose: () => void;
 }
 
+type TransactionModalKind = 'income' | 'expense';
+
 const IconComponent = ({ name, ...props }: { readonly name: string, [key: string]: unknown }) => {
   const icons: { [key: string]: React.ElementType } = {
     car: Car,
@@ -44,21 +46,24 @@ interface ToggleProps {
   readonly icon: React.ElementType;
   readonly value: boolean;
   readonly onChange: (val: boolean) => void;
-  readonly activeColor?: string;
+  readonly activeColorClass: string;
+  readonly activeTextClass: string;
+  readonly focusRingClass: string;
 }
 
-const ToggleField = ({ label, icon: Icon, value, onChange, activeColor = "bg-[#10b981]" }: ToggleProps) => (
+const ToggleField = ({ label, icon: Icon, value, onChange, activeColorClass, activeTextClass, focusRingClass }: ToggleProps) => (
   <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-4 last:border-0 last:pb-0">
     <div className="flex items-center gap-3">
-      <Icon size={20} className={cn("transition-colors", value ? "text-[#10b981]" : "text-gray-400")} />
+      <Icon size={20} className={cn("transition-colors", value ? activeTextClass : "text-gray-400")} />
       <span className="text-gray-700 dark:text-gray-200">{label}</span>
     </div>
     <button 
       type="button"
       onClick={() => onChange(!value)}
       className={cn(
-        "relative h-6 w-11 rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#10b981]",
-        value ? activeColor : "bg-gray-300 dark:bg-gray-600"
+        "relative h-6 w-11 rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        focusRingClass,
+        value ? activeColorClass : "bg-gray-300 dark:bg-gray-600"
       )}
       aria-pressed={value}
     >
@@ -78,6 +83,7 @@ interface SelectorProps<T> {
   readonly onToggle: () => void;
   readonly onSelect: (val: T) => void;
   readonly renderOption: (val: T) => React.ReactNode;
+  readonly focusRingClass: string;
 }
 
 const SelectorField = <T extends { id: string, name: string, color: string, icon: string }>({ 
@@ -87,7 +93,8 @@ const SelectorField = <T extends { id: string, name: string, color: string, icon
   isOpen, 
   onToggle, 
   onSelect,
-  renderOption
+  renderOption,
+  focusRingClass
 }: SelectorProps<T>) => (
   <div className="relative border-b border-gray-100 dark:border-white/10 pb-4">
     <div 
@@ -102,7 +109,10 @@ const SelectorField = <T extends { id: string, name: string, color: string, icon
       }}
       aria-haspopup="listbox"
       aria-expanded={isOpen}
-      className="flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 px-2 -mx-2 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10b981]"
+      className={cn(
+        "flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 px-2 -mx-2 rounded transition-colors focus-visible:outline-none focus-visible:ring-2",
+        focusRingClass
+      )}
     >
       <div className="flex items-center gap-3">
         <Icon size={20} className="text-gray-400" />
@@ -141,9 +151,60 @@ const SelectorField = <T extends { id: string, name: string, color: string, icon
   </div>
 );
 
-export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
+const TRANSACTION_MODAL_CONFIG = {
+  income: {
+    transactionType: 'INCOME' as const,
+    title: 'Nova Receita',
+    settledLabel: 'Foi recebida',
+    fixedLabel: 'Receita fixa',
+    saveErrorLogPrefix: 'Error saving income:',
+    saveErrorAlert: 'Erro ao salvar receita',
+    accentTextClass: 'text-[#10b981]',
+    accentPlaceholderClass: 'placeholder:text-[#10b981]/50',
+    accentButtonClass: 'bg-[#10b981]',
+    accentButtonHoverClass: 'hover:bg-[#059669]',
+    accentButtonShadowClass: 'shadow-emerald-900/20',
+    focusRingClass: 'focus-visible:ring-[#10b981]',
+    activeToggleClass: 'bg-[#10b981]',
+    fallbackCategories: [
+      { id: '1', name: 'Salário', icon: 'landmark', color: '#10b981', type: 'INCOME' as const },
+      { id: '2', name: 'Investimentos', icon: 'car', color: '#3b82f6', type: 'INCOME' as const },
+      { id: '3', name: 'Outros', icon: 'bookmark', color: '#6366f1', type: 'INCOME' as const },
+    ] satisfies Category[]
+  },
+  expense: {
+    transactionType: 'EXPENSE' as const,
+    title: 'Nova Despesa',
+    settledLabel: 'Foi paga',
+    fixedLabel: 'Despesa fixa',
+    saveErrorLogPrefix: 'Error saving expense:',
+    saveErrorAlert: 'Erro ao salvar despesa',
+    accentTextClass: 'text-[#ef4444]',
+    accentPlaceholderClass: 'placeholder:text-[#ef4444]/50',
+    accentButtonClass: 'bg-[#ef4444]',
+    accentButtonHoverClass: 'hover:bg-[#dc2626]',
+    accentButtonShadowClass: 'shadow-red-900/20',
+    focusRingClass: 'focus-visible:ring-[#ef4444]',
+    activeToggleClass: 'bg-[#ef4444]',
+    fallbackCategories: [
+      { id: '1', name: 'Transporte', icon: 'car', color: '#facc15', type: 'EXPENSE' as const },
+      { id: '2', name: 'Alimentação', icon: 'bookmark', color: '#ef4444', type: 'EXPENSE' as const },
+      { id: '3', name: 'Lazer', icon: 'bookmark', color: '#3b82f6', type: 'EXPENSE' as const },
+    ] satisfies Category[]
+  }
+} as const;
+
+export interface TransactionModalProps {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly kind: TransactionModalKind;
+}
+
+export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProps) {
+  const config = TRANSACTION_MODAL_CONFIG[kind];
+
   const [amount, setAmount] = useState('0,00');
-  const [isReceived, setIsReceived] = useState(true);
+  const [isPaid, setIsPaid] = useState(true);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [description, setDescription] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
@@ -164,45 +225,36 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
   const [accounts, setAccounts] = useState<Account[]>([]);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchCategories();
-      fetchAccounts();
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
 
-  async function fetchCategories() {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('type', 'INCOME');
-    
-    if (data && data.length > 0) {
-      setCategories(data);
-    } else {
-      setCategories([
-        { id: '1', name: 'Salário', icon: 'landmark', color: '#10b981', type: 'INCOME' },
-        { id: '2', name: 'Investimentos', icon: 'car', color: '#3b82f6', type: 'INCOME' },
-        { id: '3', name: 'Outros', icon: 'bookmark', color: '#6366f1', type: 'INCOME' },
-      ]);
-    }
-    if (error) console.error('Error fetching categories:', error);
-  }
+    const cfg = TRANSACTION_MODAL_CONFIG[kind];
 
-  async function fetchAccounts() {
-    const { data, error } = await supabase
-      .from('accounts')
-      .select('*');
-    
-    if (data && data.length > 0) {
-      setAccounts(data);
-    } else {
-      setAccounts([
-        { id: '1', name: 'Carteira', icon: 'wallet', color: '#06b6d4' },
-        { id: '2', name: 'Banco', icon: 'landmark', color: '#8b5cf6' },
+    const fetchData = async () => {
+      const [{ data: categoriesData, error: categoriesError }, { data: accountsData, error: accountsError }] = await Promise.all([
+        supabase.from('categories').select('*').eq('type', cfg.transactionType),
+        supabase.from('accounts').select('*')
       ]);
-    }
-    if (error) console.error('Error fetching accounts:', error);
-  }
+
+      if (categoriesData && categoriesData.length > 0) {
+        setCategories(categoriesData);
+      } else {
+        setCategories(cfg.fallbackCategories);
+      }
+      if (categoriesError) console.error('Error fetching categories:', categoriesError);
+
+      if (accountsData && accountsData.length > 0) {
+        setAccounts(accountsData);
+      } else {
+        setAccounts([
+          { id: '1', name: 'Carteira', icon: 'wallet', color: '#06b6d4' },
+          { id: '2', name: 'Banco', icon: 'landmark', color: '#8b5cf6' },
+        ]);
+      }
+      if (accountsError) console.error('Error fetching accounts:', accountsError);
+    };
+
+    void fetchData();
+  }, [isOpen, kind]);
 
   const handleSave = async () => {
     try {
@@ -227,7 +279,7 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
       const { error } = await supabase.from('transactions').insert({
         amount: numericAmount,
         currency: 'BRL',
-        is_paid: isReceived,
+        is_paid: isPaid,
         date: new Date(date).toISOString(),
         description,
         category_id: category.id,
@@ -238,14 +290,14 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
         repeat: repeat,
         repeat_times: repeat ? repeatTimes : null,
         repeat_frequency: repeat ? 'MONTHS' : null,
-        type: 'INCOME',
+        type: config.transactionType,
         user_id: userData.user.id
       });
       if (error) throw error;
       onClose();
     } catch (error) {
-      console.error('Error saving income:', error);
-      alert('Erro ao salvar receita');
+      console.error(config.saveErrorLogPrefix, error);
+      alert(config.saveErrorAlert);
     }
   };
 
@@ -256,7 +308,7 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
       <div className="relative w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-white shadow-2xl border border-gray-200 dark:border-white/5 mx-4 transition-colors duration-200">
         {/* Header - Fixed */}
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 px-8 py-5 shrink-0">
-          <h2 className="text-xl font-bold tracking-tight">Nova Receita</h2>
+          <h2 className="text-xl font-bold tracking-tight">{config.title}</h2>
           <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-white/10 transition-all active:scale-95">
             <X size={24} className="text-gray-400 dark:text-gray-400" />
           </button>
@@ -274,12 +326,16 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
                     <Calculator size={20} className="text-gray-400" />
                     <div className="flex flex-col flex-1">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-bold text-[#10b981]">R$</span>
+                        <span className={cn("text-2xl font-bold", config.accentTextClass)}>R$</span>
                         <input 
                           type="text" 
                           value={amount}
                           onChange={(e) => setAmount(formatCurrency(e.target.value))}
-                          className="w-full bg-transparent text-3xl font-bold text-[#10b981] outline-none placeholder:text-[#10b981]/50"
+                          className={cn(
+                            "w-full bg-transparent text-3xl font-bold outline-none",
+                            config.accentTextClass,
+                            config.accentPlaceholderClass
+                          )}
                           placeholder="0,00"
                         />
                       </div>
@@ -291,13 +347,15 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
                 </div>
               </div>
 
-              {/* Received Toggle */}
+              {/* Received/Paid Toggle */}
               <ToggleField 
-                label="Foi recebida" 
+                label={config.settledLabel} 
                 icon={CheckCircle} 
-                value={isReceived} 
-                onChange={setIsReceived} 
-                activeColor="bg-[#10b981]"
+                value={isPaid} 
+                onChange={setIsPaid} 
+                activeColorClass={config.activeToggleClass}
+                activeTextClass={config.accentTextClass}
+                focusRingClass={config.focusRingClass}
               />
 
               {/* Date Selector */}
@@ -346,6 +404,7 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
                   setCategory(cat);
                   setIsCategoryOpen(false);
                 }}
+                focusRingClass={config.focusRingClass}
                 renderOption={(cat) => (
                   <>
                     <IconComponent name={cat.icon} size={18} style={{ color: cat.color }} />
@@ -365,6 +424,7 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
                   setAccount(acc);
                   setIsAccountOpen(false);
                 }}
+                focusRingClass={config.focusRingClass}
                 renderOption={(acc) => (
                   <>
                     <IconComponent name={acc.icon} size={18} style={{ color: acc.color }} />
@@ -385,7 +445,9 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
                 icon={Info} 
                 value={ignoreTransaction} 
                 onChange={setIgnoreTransaction} 
-                activeColor="bg-[#10b981]"
+                activeColorClass={config.activeToggleClass}
+                activeTextClass={config.accentTextClass}
+                focusRingClass={config.focusRingClass}
               />
 
               {/* Toggle Details */}
@@ -417,11 +479,13 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
 
                 {/* Fixed Income */}
                 <ToggleField 
-                  label="Receita fixa" 
+                  label={config.fixedLabel} 
                   icon={Pin} 
                   value={isFixed} 
                   onChange={setIsFixed} 
-                  activeColor="bg-[#10b981]"
+                  activeColorClass={config.activeToggleClass}
+                  activeTextClass={config.accentTextClass}
+                  focusRingClass={config.focusRingClass}
                 />
 
                 {/* Repeat */}
@@ -431,7 +495,9 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
                     icon={RefreshCw} 
                     value={repeat} 
                     onChange={setRepeat} 
-                    activeColor="bg-[#10b981]"
+                    activeColorClass={config.activeToggleClass}
+                    activeTextClass={config.accentTextClass}
+                    focusRingClass={config.focusRingClass}
                   />
 
                   {repeat && (
@@ -468,7 +534,12 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
           </button>
           <button 
             onClick={handleSave}
-            className="rounded-xl bg-[#10b981] px-10 py-3 text-sm font-bold text-white hover:bg-[#059669] transition-all active:scale-95 shadow-lg shadow-emerald-900/20"
+            className={cn(
+              "rounded-xl px-10 py-3 text-sm font-bold text-white transition-all active:scale-95 shadow-lg",
+              config.accentButtonClass,
+              config.accentButtonHoverClass,
+              config.accentButtonShadowClass
+            )}
           >
             SALVAR
           </button>
@@ -476,4 +547,8 @@ export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
       </div>
     </div>
   );
+}
+
+export default function IncomeModal({ isOpen, onClose }: IncomeModalProps) {
+  return <TransactionModal isOpen={isOpen} onClose={onClose} kind="income" />;
 }

@@ -63,6 +63,15 @@ export default function DashboardPage() {
     }
   };
 
+  let formTitle = "Nova Transação";
+  if (selectedTransaction) {
+    formTitle = "Editar Transação";
+  } else if (activeForm === "INCOME") {
+    formTitle = "Nova Receita";
+  } else if (activeForm === "EXPENSE") {
+    formTitle = "Nova Despesa";
+  }
+
   return (
     <div className="flex flex-col flex-1 bg-transparent text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <main className="flex-1 px-4 py-8 mx-auto w-full max-w-3xl">
@@ -163,7 +172,7 @@ export default function DashboardPage() {
       <BottomSheet 
         isOpen={!!activeForm} 
         onClose={() => { setActiveForm(null); setSelectedTransaction(null); }}
-        title={selectedTransaction ? "Editar Transação" : (activeForm === 'INCOME' ? "Nova Receita" : "Nova Despesa")}
+        title={formTitle}
       >
         {activeForm && (
           <TransactionForm 

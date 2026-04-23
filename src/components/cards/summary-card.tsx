@@ -1,11 +1,11 @@
 // src/components/cards/summary-card.tsx
 import { cn } from "@/lib/utils"; // Assumindo que você tem o utilitário do Shadcn/UI
 
-interface SummaryCardProps {
+type SummaryCardProps = Readonly<{
   title: string;
   amount: number;
-  type?: "default" | "income" | "expense";
-}
+  type?: string;
+}>;
 
 export function SummaryCard({ title, amount, type = "default" }: SummaryCardProps) {
   // Formatação de moeda nativa do JS

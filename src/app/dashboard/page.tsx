@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Loader2 } from "lucide-react";
+import { Calendar, Loader2, Pencil, Trash2, Minus, Plus} from "lucide-react";
 import { SummaryCard } from "@/components/cards/summary-card";
 import { TransactionCard } from "@/components/cards/transaction-card";
 import { BottomSheet } from "@/components/mobile/bottom-sheet";
@@ -89,7 +89,7 @@ export default function DashboardPage() {
               onChange={(e) => setCurrentDate(e.target.value)}
               className="bg-transparent outline-none cursor-pointer w-auto text-center color-transparent"
             />
-            <Calendar className="absolute right-4 text-gray-400" size={18} />
+            {/* <Calendar className="absolute right-4 text-gray-400" size={18} /> */}
           </label>
         </div>
 
@@ -117,13 +117,13 @@ export default function DashboardPage() {
                 onClick={() => { setActiveForm('INCOME'); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm font-bold text-xl"
               >
-                +
+                <Plus className="w-6 h-6" />
               </button>
               <button 
                 onClick={() => { setActiveForm('EXPENSE'); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm font-bold text-xl"
               >
-                -
+                <Minus className="w-6 h-6" />
               </button>
             </div>
 
@@ -198,14 +198,16 @@ export default function DashboardPage() {
             onClick={handleOpenEdit} // <-- AQUI CHAMAMOS A FUNÇÃO DE EDITAR
             className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white p-4 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
           >
-              ✏️ Editar Transação
+            <Pencil className="w-5 h-5" />
+            Editar Transação
           </button>
           
           <button 
             onClick={handleDelete}
             className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/30 text-red-600 p-4 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
           >
-              🗑️ Excluir
+            <Trash2 className="w-5 h-5" />
+            Excluir
           </button>
         </div>
       </BottomSheet>

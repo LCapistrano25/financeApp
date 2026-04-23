@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint (Quality)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
       - run: npm run lint
 
   security_audit:
-    name: Dependency
+    name: Dependency (SCA)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +78,7 @@ jobs:
           if-no-files-found: error
 
   sonar:
-    name: SonarCloud
+    name: SonarCloud (SAST)
     needs: build
     if: success()
     runs-on: ubuntu-latest
@@ -91,13 +91,15 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
+      - name: Run Tests with Coverage
+        run: npm run test:coverage
       - name: SonarCloud Scan
         run: npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   dast:
-    name: 🔍 DAST Security Scan (ZAP)
+    name: OWASP ZAP (DAST)
     needs: build
     if: success()
     runs-on: ubuntu-latest
@@ -120,7 +122,7 @@ jobs:
         run: |
           npm start &
           npx wait-on http://localhost:3000 --timeout 60000
-      - name: 🔍 Run OWASP ZAP baseline scan
+      - name: Run OWASP ZAP baseline scan
         run: |
           docker run --network="host" \
             --user root \

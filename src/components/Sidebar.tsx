@@ -26,8 +26,13 @@ export function Sidebar() {
                 <span className="ml-4 font-bold text-xl tracking-tight">Finance</span>
             </div>
 
-            <div className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"}`} onClick={() => setIsOpen(false)} />
-
+            <button
+            aria-label="Fechar menu"
+            onClick={() => setIsOpen(false)}
+            className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+                isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+            }`}
+            />
             <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-[#0f172a] shadow-2xl border-r border-gray-200 dark:border-slate-800 transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
                 
                 {/* ... Header e User Info iguais ... */}

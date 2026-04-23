@@ -24,14 +24,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // 1. Adicionamos suppressHydrationWarning (necessário para bibliotecas de tema)
     <html
       lang="pt-BR"
       suppressHydrationWarning 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      {/* 2. Envolvemos tudo com o ThemeProvider */}
-      <body className="min-h-full bg-white dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      {/* ADICIONADO O suppressHydrationWarning AQUI TAMBÉM */}
+      <body 
+        suppressHydrationWarning 
+        className="min-h-full bg-white dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors duration-300"
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

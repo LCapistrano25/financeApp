@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Loader2, Pencil, Trash2, Minus, Plus} from "lucide-react";
+import { Loader2, Pencil, Trash2, Minus, Plus} from "lucide-react";
 import { SummaryCard } from "@/components/cards/summary-card";
 import { TransactionCard } from "@/components/cards/transaction-card";
 import { BottomSheet } from "@/components/mobile/bottom-sheet";

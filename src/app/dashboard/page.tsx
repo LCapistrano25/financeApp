@@ -1,14 +1,61 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Moon } from "lucide-react";
-import ExpenseModal from "@/components/ExpenseModal";
-import IncomeModal from "@/components/IncomeModal";
+import { Calendar, Loader2 } from "lucide-react";
+import { SummaryCard } from "@/components/cards/summary-card";
+import { TransactionCard } from "@/components/cards/transaction-card";
+import { BottomSheet } from "@/components/mobile/bottom-sheet";
+import { TransactionForm } from "@/components/forms/transaction-form";
+import { useTransactions } from "@/hooks/use-transactions";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardPage() {
-  const [referenceDate] = useState("janeiro de 2026");
-  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
-  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState("2026-01"); 
+  
+  // 1. Hook limpo e puxando o "refresh" para atualizar sem F5
+  const { transactions, totals, isLoading, error, refresh } = useTransactions(currentDate);
+
+  // 2. Estados de Controle das Gavetas
+  const [activeForm, setActiveForm] = useState<'INCOME' | 'EXPENSE' | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  // 3. Guardar a transação INTEIRA selecionada (não só o ID) para podermos editar
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+
+  // Separando rendas e contas
+  const incomes = transactions.filter(t => t.type === "INCOME");
+  const expenses = transactions.filter(t => t.type === "EXPENSE");
+
+  // --- FUNÇÕES DE AÇÃO ---
+
+  // Quando clica num card da lista
+  const handleTransactionClick = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setIsDetailOpen(true);
+  };
+
+  // Quando clica no botão "Editar" dentro da gaveta de detalhes
+  const handleOpenEdit = () => {
+    setActiveForm(selectedTransaction.type); // Abre o formulário como Renda ou Despesa
+    setIsDetailOpen(false); // Fecha a gaveta de opções
+  };
+
+  // Quando clica no botão "Excluir"
+  const handleDelete = async () => {
+    const title = selectedTransaction?.title || selectedTransaction?.description;
+    const confirmDelete = window.confirm(`Tem certeza que deseja excluir "${title}"?`);
+    if (!confirmDelete) return;
+
+    try {
+      const { error } = await supabase.from('transactions').delete().eq('id', selectedTransaction.id);
+      if (error) throw error;
+      
+      setIsDetailOpen(false); // Fecha a gaveta
+      refresh(); // <-- MÁGICA! Atualiza a tela sem dar F5
+    } catch (err) {
+      alert("Erro ao excluir!");
+    }
+  };
 
   return (
     <div className="flex flex-col flex-1 bg-transparent text-slate-900 dark:text-slate-100 transition-colors duration-300">
@@ -102,43 +149,8 @@ export default function DashboardPage() {
                 )}
               </section>
             </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 mb-8">
-          <button 
-            onClick={() => setIsIncomeModalOpen(true)}
-            className="flex h-12 items-center justify-center rounded-xl bg-[#10b981] text-white hover:bg-[#059669] transition-colors shadow-sm font-bold text-xl"
-          >
-            +
-          </button>
-          <button 
-            onClick={() => setIsExpenseModalOpen(true)}
-            className="flex h-12 items-center justify-center rounded-xl bg-[#ef4444] text-white hover:bg-[#dc2626] transition-colors shadow-sm font-bold text-xl"
-          >
-            -
-          </button>
-        </div>
-
-        <ExpenseModal 
-          isOpen={isExpenseModalOpen} 
-          onClose={() => setIsExpenseModalOpen(false)} 
-        />
-
-        <IncomeModal 
-          isOpen={isIncomeModalOpen} 
-          onClose={() => setIsIncomeModalOpen(false)} 
-        />
-
-        <div className="space-y-6">
-          <section>
-            <h3 className="font-bold text-[#111827] text-lg mb-4">Rendas</h3>
-          </section>
-
-          <section>
-            <h3 className="font-bold text-[#111827] text-lg mb-4">Contas</h3>
-          </section>
-        </div>
+          </>
+        )}
       </main>
 
       {/* --- GAVETA 1: FORMULÁRIO (CRIAÇÃO E EDIÇÃO) --- */}

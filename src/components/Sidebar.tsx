@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogOut, Home, PieChart, Wallet, User as UserIcon } from "lucide-react";
+import { LogOut, Home, Wallet, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
 import {User} from "@supabase/auth-js";
@@ -71,11 +71,7 @@ export function Sidebar() {
                 </a>
                 <button type="button" className="w-full text-left flex items-center px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#0f172a] dark:hover:text-white rounded-lg group transition-colors">
                     <Wallet size={20} className="mr-3 group-hover:text-[#0f172a] dark:group-hover:text-white transition-colors" />
-                    <span className="font-semibold text-[13px]">Transações</span>
-                </button>
-                <button type="button" className="w-full text-left flex items-center px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#0f172a] dark:hover:text-white rounded-lg group transition-colors">
-                    <PieChart size={20} className="mr-3 group-hover:text-[#0f172a] dark:group-hover:text-white transition-colors" />
-                    <span className="font-semibold text-[13px]">Relatórios</span>
+                    <span className="font-semibold text-[13px]">Categorias</span>
                 </button>
             </nav>
 

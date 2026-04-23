@@ -18,10 +18,14 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
+      const redirectTo = typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback`
+        : "/auth/callback";
+
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
         },
       });
     } catch (error) {

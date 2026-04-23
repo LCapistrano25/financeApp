@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Calendar, Moon } from "lucide-react";
+import ExpenseModal from "@/components/ExpenseModal";
 
 export default function DashboardPage() {
   const [referenceDate] = useState("janeiro de 2026");
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col flex-1">
@@ -51,10 +53,18 @@ export default function DashboardPage() {
           <button className="flex h-12 items-center justify-center rounded-xl bg-[#10b981] text-white hover:bg-[#059669] transition-colors shadow-sm font-bold text-xl">
             +
           </button>
-          <button className="flex h-12 items-center justify-center rounded-xl bg-[#ef4444] text-white hover:bg-[#dc2626] transition-colors shadow-sm font-bold text-xl">
+          <button 
+            onClick={() => setIsExpenseModalOpen(true)}
+            className="flex h-12 items-center justify-center rounded-xl bg-[#ef4444] text-white hover:bg-[#dc2626] transition-colors shadow-sm font-bold text-xl"
+          >
             -
           </button>
         </div>
+
+        <ExpenseModal 
+          isOpen={isExpenseModalOpen} 
+          onClose={() => setIsExpenseModalOpen(false)} 
+        />
 
         <div className="space-y-6">
           <section>

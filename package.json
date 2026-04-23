@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint . --max-warnings=0 --cache"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.15.0",

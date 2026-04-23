@@ -1,57 +1,29 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* 1. Isso ensina o Tailwind v4 a usar a classe .dark do next-themes */
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* 2. Mapeamos as variáveis para o Tailwind usar com bg-background etc */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 3. Cores do Modo Claro */
+:root {
+  --background: #f2f4f8; /* Sua cor do CSS antigo */
+  --foreground: #111827;
 }
 
+/* 4. Cores do Modo Escuro (Acionado pelo next-themes) */
+.dark {
+  --background: #0f172a; /* Sua cor do CSS antigo */
+  --foreground: #f8fafc;
+}
+
+/* 5. Aplicamos no corpo do site */
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Custom Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Hide native date picker icon */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  cursor: pointer;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: auto;
-  height: auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

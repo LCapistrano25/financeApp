@@ -84,6 +84,10 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     `Confirmar ${transactionTypeName}`
   );
 
+  const typeClasses = type === "INCOME" 
+    ? "bg-emerald-500 shadow-emerald-500/20" 
+    : "bg-red-500 shadow-red-500/20";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="text-center py-4">
@@ -96,7 +100,6 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
             id="amount"
             type="number" 
             step="0.01"
-            required
             placeholder="0.00"
             className="text-4xl font-bold bg-transparent outline-none w-40 text-center placeholder:opacity-20 text-slate-900 dark:text-slate-100"
             value={amount}
@@ -112,7 +115,6 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
           <input 
             id="title"
             type="text" 
-            required
             placeholder="Ex: Aluguel, Salário..." 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -126,7 +128,6 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
             <input 
               id="date"
               type="date" 
-              required
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none color-scheme-dark text-slate-900 dark:text-slate-100" 
@@ -151,7 +152,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
       <button 
         disabled={isLoading}
         type="submit" 
-        className={`w-full flex justify-center items-center gap-2 p-4 rounded-2xl font-bold text-white shadow-lg transition-transform active:scale-95 mt-4 ${type === 'INCOME' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-red-500 shadow-red-500/20'} disabled:opacity-50`}
+        className={`w-full flex justify-center items-center gap-2 p-4 rounded-2xl font-bold text-white shadow-lg transition-transform active:scale-95 mt-4 ${typeClasses} disabled:opacity-50`}
       >
         {submitButtonContent}
       </button>

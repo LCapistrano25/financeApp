@@ -41,7 +41,7 @@ export function Sidebar() {
                 <div className="p-6 flex flex-col items-center">
                     <div className="relative w-20 h-20 mb-4 shadow-lg rounded-full overflow-hidden border-2 border-emerald-500/20">
                         {avatarUrl ? (
-                            <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
+                            <Image src={avatarUrl} alt="Avatar" fill sizes="80px" className="object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-slate-800">
                                 <UserIcon size={32} className="text-gray-400" />
@@ -63,14 +63,9 @@ export function Sidebar() {
                         }}
                         className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
                     >
-                        {isDark ? (
-                            <Sun size={22} className="group-hover:scale-110 transition-transform text-amber-500" />
-                        ) : (
-                            <Moon size={22} className="group-hover:scale-110 transition-transform text-blue-500" />
-                        )}
-                        <span className="font-medium">
-                            {isDark ? "Modo Claro" : "Modo Escuro"}
-                        </span>
+                        <Sun size={22} className="hidden dark:block group-hover:scale-110 transition-transform text-amber-500" />
+                        <Moon size={22} className="block dark:hidden group-hover:scale-110 transition-transform text-blue-500" />
+                        <span className="font-medium">Alternar tema</span>
                     </button>
                 </nav>
 

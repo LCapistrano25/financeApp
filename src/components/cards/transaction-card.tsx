@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 
-interface TransactionCardProps {
+type TransactionCardProps = Readonly<{
   title: string;
   category: string;
   amount: number;
   type: "income" | "expense";
   onClick?: () => void;
-}
+}>;
 
 export function TransactionCard({ title, category, amount, type, onClick }: TransactionCardProps) {
   const formattedAmount = new Intl.NumberFormat("pt-BR", {

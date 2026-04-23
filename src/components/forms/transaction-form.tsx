@@ -13,11 +13,11 @@ type TransactionFormInitialData = {
   readonly is_paid: Transaction["is_paid"];
 };
 
-interface TransactionFormProps {
+type TransactionFormProps = Readonly<{
   type: 'INCOME' | 'EXPENSE';
   initialData?: TransactionFormInitialData;
   onSuccess: () => void;
-}
+}>;
 
 export function TransactionForm({ type, initialData, onSuccess }: TransactionFormProps) {
   // Se veio initialData, significa que estamos Editando
@@ -33,8 +33,8 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
 
     setIsLoading(true);

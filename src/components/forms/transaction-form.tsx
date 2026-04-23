@@ -34,7 +34,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
 
@@ -76,13 +76,14 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
 
   const transactionTypeName = type === "INCOME" ? "Receita" : "Despesa";
 
-  const submitButtonContent = isLoading ? (
-    <Loader2 className="animate-spin" />
-  ) : isEditing ? (
-    "Guardar Alterações"
-  ) : (
-    `Confirmar ${transactionTypeName}`
-  );
+  let submitButtonContent;
+  if (isLoading) {
+    submitButtonContent = <Loader2 className="animate-spin" />;
+  } else if (isEditing) {
+    submitButtonContent = "Guardar Alterações";
+  } else {
+    submitButtonContent = `Confirmar ${transactionTypeName}`;
+  }
 
   const typeClasses = type === "INCOME" 
     ? "bg-emerald-500 shadow-emerald-500/20" 

@@ -1,27 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LogOut, Moon, Sun, User as UserIcon, Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth"; 
 import Image from "next/image";
 import { useTheme } from "next-themes";
 
 export function Sidebar() {
-    const [mounted, setMounted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const { user, logout } = useAuth();
     const { setTheme, resolvedTheme } = useTheme();
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
     const avatarUrl = user?.user_metadata?.avatar_url;
     const fullName = user?.user_metadata?.full_name || "Usuário";
     const email = user?.email || "";
-
-    // Descobrimos se está escuro (com fallback seguro para evitar hidratação errada)
-    const isDark = mounted && resolvedTheme === "dark";
+    const isDark = resolvedTheme === "dark";
 
     return (
         <>

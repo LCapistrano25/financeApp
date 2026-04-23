@@ -15,8 +15,8 @@ export function useTransactions(monthYear: string) {
       if (!session) return;
 
       const [year, month] = monthYear.split("-");
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1).toISOString();
-      const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59).toISOString();
+      const startDate = new Date(Number.parseInt(year, 10), Number.parseInt(month, 10) - 1, 1).toISOString();
+      const endDate = new Date(Number.parseInt(year, 10), Number.parseInt(month, 10), 0, 23, 59, 59).toISOString();
 
       const { data, error: supabaseError } = await supabase
         .from("transactions")
@@ -27,8 +27,8 @@ export function useTransactions(monthYear: string) {
 
       if (supabaseError) throw supabaseError;
       setTransactions(data || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setIsLoading(false);
     }

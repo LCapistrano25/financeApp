@@ -29,6 +29,8 @@ interface IncomeModalProps {
 }
 
 type TransactionModalKind = 'income' | 'expense';
+type ModalCategory = Pick<Category, 'id' | 'name' | 'icon' | 'color' | 'type'>;
+type ModalAccount = Pick<Account, 'id' | 'name' | 'icon' | 'color'>;
 
 const IconComponent = ({ name, ...props }: { readonly name: string, [key: string]: unknown }) => {
   const icons: { [key: string]: React.ElementType } = {
@@ -170,7 +172,7 @@ const TRANSACTION_MODAL_CONFIG = {
       { id: '1', name: 'Salário', icon: 'landmark', color: '#10b981', type: 'INCOME' as const },
       { id: '2', name: 'Investimentos', icon: 'car', color: '#3b82f6', type: 'INCOME' as const },
       { id: '3', name: 'Outros', icon: 'bookmark', color: '#6366f1', type: 'INCOME' as const },
-    ] satisfies Category[]
+    ] as const satisfies readonly ModalCategory[]
   },
   expense: {
     transactionType: 'EXPENSE' as const,
@@ -190,7 +192,7 @@ const TRANSACTION_MODAL_CONFIG = {
       { id: '1', name: 'Transporte', icon: 'car', color: '#facc15', type: 'EXPENSE' as const },
       { id: '2', name: 'Alimentação', icon: 'bookmark', color: '#ef4444', type: 'EXPENSE' as const },
       { id: '3', name: 'Lazer', icon: 'bookmark', color: '#3b82f6', type: 'EXPENSE' as const },
-    ] satisfies Category[]
+    ] as const satisfies readonly ModalCategory[]
   }
 } as const;
 
@@ -208,8 +210,8 @@ export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProp
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [description, setDescription] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
-  const [category, setCategory] = useState<Category | null>(null);
-  const [account, setAccount] = useState<Account | null>(null);
+  const [category, setCategory] = useState<ModalCategory | null>(null);
+  const [account, setAccount] = useState<ModalAccount | null>(null);
   const [ignoreTransaction, setIgnoreTransaction] = useState(false);
   const [observation, setObservation] = useState('');
   const [showMoreDetails, setShowMoreDetails] = useState(true);
@@ -221,8 +223,8 @@ export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProp
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [categories, setCategories] = useState<ModalCategory[]>([]);
+  const [accounts, setAccounts] = useState<ModalAccount[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -236,14 +238,14 @@ export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProp
       ]);
 
       if (categoriesData && categoriesData.length > 0) {
-        setCategories(categoriesData);
+        setCategories(categoriesData as ModalCategory[]);
       } else {
-        setCategories(cfg.fallbackCategories);
+        setCategories([...cfg.fallbackCategories]);
       }
       if (categoriesError) console.error('Error fetching categories:', categoriesError);
 
       if (accountsData && accountsData.length > 0) {
-        setAccounts(accountsData);
+        setAccounts(accountsData as ModalAccount[]);
       } else {
         setAccounts([
           { id: '1', name: 'Carteira', icon: 'wallet', color: '#06b6d4' },
@@ -394,7 +396,7 @@ export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProp
               </div>
 
               {/* Category Selector */}
-              <SelectorField<Category>
+              <SelectorField
                 icon={Bookmark}
                 value={category}
                 options={categories}
@@ -414,7 +416,7 @@ export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProp
               />
 
               {/* Account Selector */}
-              <SelectorField<Account>
+              <SelectorField
                 icon={Landmark}
                 value={account}
                 options={accounts}

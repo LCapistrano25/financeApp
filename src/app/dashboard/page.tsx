@@ -8,6 +8,7 @@ import { BottomSheet } from "@/components/mobile/bottom-sheet";
 import { TransactionForm } from "@/components/forms/transaction-form";
 import { useTransactions } from "@/hooks/use-transactions";
 import { supabase } from "@/lib/supabase";
+import type { Transaction } from "@/types";
 
 export default function DashboardPage() {
   const [currentDate, setCurrentDate] = useState("2026-01"); 
@@ -15,35 +16,40 @@ export default function DashboardPage() {
   // 1. Hook limpo e puxando o "refresh" para atualizar sem F5
   const { transactions, totals, isLoading, error, refresh } = useTransactions(currentDate);
 
+  type TransactionWithCategory = Transaction & { category?: { name: string } | null };
+
   // 2. Estados de Controle das Gavetas
   const [activeForm, setActiveForm] = useState<'INCOME' | 'EXPENSE' | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   
   // 3. Guardar a transação INTEIRA selecionada (não só o ID) para podermos editar
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithCategory | null>(null);
 
   // Separando rendas e contas
-  const incomes = transactions.filter(t => t.type === "INCOME");
-  const expenses = transactions.filter(t => t.type === "EXPENSE");
+  const typedTransactions = transactions as TransactionWithCategory[];
+  const incomes = typedTransactions.filter((t) => t.type === "INCOME");
+  const expenses = typedTransactions.filter((t) => t.type === "EXPENSE");
 
   // --- FUNÇÕES DE AÇÃO ---
 
   // Quando clica num card da lista
-  const handleTransactionClick = (transaction: any) => {
+  const handleTransactionClick = (transaction: TransactionWithCategory) => {
     setSelectedTransaction(transaction);
     setIsDetailOpen(true);
   };
 
   // Quando clica no botão "Editar" dentro da gaveta de detalhes
   const handleOpenEdit = () => {
+    if (!selectedTransaction) return;
     setActiveForm(selectedTransaction.type); // Abre o formulário como Renda ou Despesa
     setIsDetailOpen(false); // Fecha a gaveta de opções
   };
 
   // Quando clica no botão "Excluir"
   const handleDelete = async () => {
+    if (!selectedTransaction) return;
     const title = selectedTransaction?.title || selectedTransaction?.description;
-    const confirmDelete = window.confirm(`Tem certeza que deseja excluir "${title}"?`);
+    const confirmDelete = globalThis.confirm(`Tem certeza que deseja excluir "${title}"?`);
     if (!confirmDelete) return;
 
     try {
@@ -52,7 +58,7 @@ export default function DashboardPage() {
       
       setIsDetailOpen(false); // Fecha a gaveta
       refresh(); // <-- MÁGICA! Atualiza a tela sem dar F5
-    } catch (err) {
+    } catch {
       alert("Erro ao excluir!");
     }
   };
@@ -120,7 +126,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.title || item.description || "Renda"}
-                      category={(item as any).category?.name || "Sem categoria"}
+                      category={item.category?.name || "Sem categoria"}
                       amount={item.amount}
                       type="income"
                       onClick={() => handleTransactionClick(item)} // <-- Passamos o OBJETO INTEIRO aqui
@@ -138,7 +144,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.title || item.description || "Conta"}
-                      category={(item as any).category?.name || "Sem categoria"}
+                      category={item.category?.name || "Sem categoria"}
                       amount={item.amount}
                       type="expense"
                       onClick={() => handleTransactionClick(item)} // <-- Passamos o OBJETO INTEIRO aqui
@@ -162,7 +168,7 @@ export default function DashboardPage() {
         {activeForm && (
           <TransactionForm 
             type={activeForm} 
-            initialData={selectedTransaction} // Passa os dados se estiver editando!
+            initialData={selectedTransaction ?? undefined} // Passa os dados se estiver editando!
             onSuccess={() => { 
               setActiveForm(null); 
               setSelectedTransaction(null);

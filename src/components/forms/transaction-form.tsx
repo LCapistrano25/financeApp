@@ -3,10 +3,19 @@
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import type { Transaction } from "@/types";
+
+type TransactionFormInitialData = {
+  readonly id: Transaction["id"];
+  readonly amount: Transaction["amount"];
+  readonly description?: Transaction["description"];
+  readonly date: Transaction["date"];
+  readonly is_paid: Transaction["is_paid"];
+};
 
 interface TransactionFormProps {
   type: 'INCOME' | 'EXPENSE';
-  initialData?: any; // Recebe os dados se for uma edição
+  initialData?: TransactionFormInitialData;
   onSuccess: () => void;
 }
 
@@ -37,7 +46,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
       const payload = {
         user_id: session.user.id,
         description: title, // <--- Salvamos a variável title dentro da coluna description
-        amount: parseFloat(amount.replace(',', '.')),
+        amount: Number.parseFloat(amount.replace(',', '.')),
         type: type,
         date: new Date(date).toISOString(),
         is_paid: isPaid,
@@ -55,9 +64,10 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
 
       onSuccess(); // Sucesso! Avisa a página para fechar a gaveta e recarregar a lista.
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      alert("Erro ao salvar transação: " + error.message);
+      const message = error instanceof Error ? error.message : "Erro desconhecido";
+      alert("Erro ao salvar transação: " + message);
     } finally {
       setIsLoading(false);
     }

@@ -10,8 +10,15 @@ import { useTransactions } from "@/hooks/use-transactions";
 import { supabase } from "@/lib/supabase";
 import type { Transaction } from "@/types";
 
+function getCurrentMonthYear() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
 export default function DashboardPage() {
-  const [currentDate, setCurrentDate] = useState("2026-01"); 
+  const [currentDate, setCurrentDate] = useState(getCurrentMonthYear); 
   
   // 1. Hook limpo e puxando o "refresh" para atualizar sem F5
   const { transactions, totals, isLoading, error, refresh } = useTransactions(currentDate);

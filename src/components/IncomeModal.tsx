@@ -410,7 +410,7 @@ export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProp
                 renderOption={(cat) => (
                   <>
                     <IconComponent name={cat.icon} size={18} style={{ color: cat.color }} />
-                    <span className="text-sm text-gray-200">{cat.name}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-200">{cat.name}</span>
                   </>
                 )}
               />
@@ -430,7 +430,7 @@ export function TransactionModal({ isOpen, onClose, kind }: TransactionModalProp
                 renderOption={(acc) => (
                   <>
                     <IconComponent name={acc.icon} size={18} style={{ color: acc.color }} />
-                    <span className="text-sm text-gray-200">{acc.name}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-200">{acc.name}</span>
                   </>
                 )}
               />

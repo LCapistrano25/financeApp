@@ -1,9 +1,9 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useAuth } from './use-auth';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/infrastructure/supabase/supabase.client';
 import { useRouter } from 'next/navigation';
 
-jest.mock('@/lib/supabase', () => ({
+jest.mock('@/infrastructure/supabase/supabase.client', () => ({
   supabase: {
     auth: {
       getSession: jest.fn(),

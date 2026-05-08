@@ -1,5 +1,5 @@
 // src/components/cards/summary-card.tsx
-import { cn } from "@/lib/utils"; // Assumindo que você tem o utilitário do Shadcn/UI
+import { cn } from "@/presentation/lib/utils"; // Assumindo que você tem o utilitário do Shadcn/UI
 
 type SummaryCardProps = Readonly<{
   title: string;

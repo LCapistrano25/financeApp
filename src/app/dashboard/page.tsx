@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { Loader2, Pencil, Trash2, Minus, Plus} from "lucide-react";
-import { SummaryCard } from "@/components/cards/summary-card";
-import { TransactionCard } from "@/components/cards/transaction-card";
-import { BottomSheet } from "@/components/mobile/bottom-sheet";
-import { TransactionForm } from "@/components/forms/transaction-form";
-import { useTransactions } from "@/hooks/use-transactions";
-import { supabase } from "@/lib/supabase";
-import type { Transaction } from "@/types";
+import { SummaryCard } from "@/presentation/components/cards/summary-card";
+import { TransactionCard } from "@/presentation/components/cards/transaction-card";
+import { BottomSheet } from "@/presentation/components/mobile/bottom-sheet";
+import { TransactionForm } from "@/presentation/components/forms/transaction-form";
+import { useTransactions } from "@/presentation/hooks/use-transactions";
+import { useDeleteTransaction } from "@/presentation/hooks/use-delete-transaction"; // <-- NOVO HOOK IMPORTADO
+import type { Transaction } from "@/domain/entities/transaction";
 
 function getCurrentMonthYear() {
   const now = new Date();
@@ -20,16 +20,17 @@ function getCurrentMonthYear() {
 export default function DashboardPage() {
   const [currentDate, setCurrentDate] = useState(getCurrentMonthYear); 
   
-  // 1. Hook limpo e puxando o "refresh" para atualizar sem F5
+  // 1. Hook de listagem
   const { transactions, totals, isLoading, error, refresh } = useTransactions(currentDate);
+  
+  // 2. Hook de exclusão (Limpo e isolado)
+  const { deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
 
   type TransactionWithCategory = Transaction & { category?: { name: string } | null };
 
-  // 2. Estados de Controle das Gavetas
+  // 3. Estados de Controle das Gavetas
   const [activeForm, setActiveForm] = useState<'INCOME' | 'EXPENSE' | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  
-  // 3. Guardar a transação INTEIRA selecionada (não só o ID) para podermos editar
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithCategory | null>(null);
 
   // Separando rendas e contas
@@ -39,34 +40,31 @@ export default function DashboardPage() {
 
   // --- FUNÇÕES DE AÇÃO ---
 
-  // Quando clica num card da lista
   const handleTransactionClick = (transaction: TransactionWithCategory) => {
     setSelectedTransaction(transaction);
     setIsDetailOpen(true);
   };
 
-  // Quando clica no botão "Editar" dentro da gaveta de detalhes
   const handleOpenEdit = () => {
     if (!selectedTransaction) return;
-    setActiveForm(selectedTransaction.type); // Abre o formulário como Renda ou Despesa
-    setIsDetailOpen(false); // Fecha a gaveta de opções
+    setActiveForm(selectedTransaction.type); 
+    setIsDetailOpen(false); 
   }
 
-  // Quando clica no botão "Excluir"
+  // --- A MÁGICA DA EXCLUSÃO ACONTECE AQUI ---
   const handleDelete = async () => {
     if (!selectedTransaction) return;
-    const title = selectedTransaction?.title || selectedTransaction?.description;
-    const confirmDelete = globalThis.confirm(`Tem certeza que deseja excluir "${title}"?`);
-    if (!confirmDelete) return;
-
+    
+    // O hook de delete já tem o confirm nativo (ou você pode manter o seu aqui)
     try {
-      const { error } = await supabase.from('transactions').delete().eq('id', selectedTransaction.id);
-      if (error) throw error;
+      const success = await deleteTransaction(selectedTransaction.id);
       
-      setIsDetailOpen(false); // Fecha a gaveta
-      refresh(); // <-- MÁGICA! Atualiza a tela sem dar F5
+      if (success) {
+        setIsDetailOpen(false); // Fecha a gaveta
+        refresh(); // Atualiza a tela sem dar F5
+      }
     } catch {
-      alert("Erro ao excluir!");
+      alert("Erro ao excluir!"); // O erro real já foi tratado pelo hook
     }
   };
 
@@ -96,7 +94,6 @@ export default function DashboardPage() {
               onChange={(e) => setCurrentDate(e.target.value)}
               className="bg-transparent outline-none cursor-pointer w-auto text-center color-transparent"
             />
-            {/* <Calendar className="absolute right-4 text-gray-400" size={18} /> */}
           </label>
         </div>
 
@@ -145,7 +142,7 @@ export default function DashboardPage() {
                       category={item.category?.name || "Sem categoria"}
                       amount={item.amount}
                       type="income"
-                      onClick={() => handleTransactionClick(item)} // <-- Passamos o OBJETO INTEIRO aqui
+                      onClick={() => handleTransactionClick(item)}
                     />
                   ))
                 ) : (
@@ -163,7 +160,7 @@ export default function DashboardPage() {
                       category={item.category?.name || "Sem categoria"}
                       amount={item.amount}
                       type="expense"
-                      onClick={() => handleTransactionClick(item)} // <-- Passamos o OBJETO INTEIRO aqui
+                      onClick={() => handleTransactionClick(item)}
                     />
                   ))
                 ) : (
@@ -175,7 +172,6 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {/* --- GAVETA 1: FORMULÁRIO (CRIAÇÃO E EDIÇÃO) --- */}
       <BottomSheet 
         isOpen={!!activeForm} 
         onClose={() => { setActiveForm(null); setSelectedTransaction(null); }}
@@ -184,17 +180,16 @@ export default function DashboardPage() {
         {activeForm && (
           <TransactionForm 
             type={activeForm} 
-            initialData={selectedTransaction ?? undefined} // Passa os dados se estiver editando!
+            initialData={selectedTransaction ?? undefined}
             onSuccess={() => { 
               setActiveForm(null); 
               setSelectedTransaction(null);
-              refresh(); // Atualiza a tela sem F5
+              refresh(); 
             }} 
           />
         )}
       </BottomSheet>
 
-      {/* --- GAVETA 2: OPÇÕES DA TRANSAÇÃO (Editar / Excluir) --- */}
       <BottomSheet 
         isOpen={isDetailOpen} 
         onClose={() => setIsDetailOpen(false)} 
@@ -202,7 +197,7 @@ export default function DashboardPage() {
       >
         <div className="flex flex-col gap-3 pb-4">
           <button 
-            onClick={handleOpenEdit} // <-- AQUI CHAMAMOS A FUNÇÃO DE EDITAR
+            onClick={handleOpenEdit}
             className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white p-4 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
           >
             <Pencil className="w-5 h-5" />
@@ -211,10 +206,11 @@ export default function DashboardPage() {
           
           <button 
             onClick={handleDelete}
-            className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/30 text-red-600 p-4 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+            disabled={isDeleting} // <-- Previne duplo clique enquanto deleta!
+            className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/30 text-red-600 p-4 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
           >
-            <Trash2 className="w-5 h-5" />
-            Excluir
+            {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+            {isDeleting ? 'Excluindo...' : 'Excluir'}
           </button>
         </div>
       </BottomSheet>

@@ -3,13 +3,17 @@
 import * as React from "react";
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import type { Transaction } from "@/types";
+import type { Transaction } from "@/domain/entities/transaction";
+
+// IMPORTAMOS OS NOSSOS HOOKS DE CASO DE USO
+import { useCreateTransaction } from "@/presentation/hooks/use-create-transaction";
+import { useEditTransaction } from "@/presentation/hooks/use-edit-transaction";
 
 type TransactionFormInitialData = {
   readonly id: Transaction["id"];
   readonly amount: Transaction["amount"];
   readonly description?: Transaction["description"];
+  readonly title?: Transaction["title"];
   readonly date: Transaction["date"];
   readonly is_paid: Transaction["is_paid"];
 };
@@ -21,46 +25,41 @@ type TransactionFormProps = Readonly<{
 }>;
 
 export function TransactionForm({ type, initialData, onSuccess }: TransactionFormProps) {
-  // Se veio initialData, significa que estamos Editando
   const isEditing = !!initialData;
+
+  // INICIAMOS OS HOOKS
+  const { createTransaction, isLoading: isCreating } = useCreateTransaction();
+  const { editTransaction, isLoading: isUpdating } = useEditTransaction();
+  const isSubmitting = isCreating || isUpdating; // Unifica o estado de loading
 
   // Estados do formulário
   const [amount, setAmount] = useState(initialData?.amount?.toString() || "");
   
-  // OPÇÃO 2: Puxamos o valor inicial de 'description' em vez de 'title'
-  const [title, setTitle] = useState(initialData?.description || "");
+  // Puxamos 'title' se existir, ou o fallback 'description'
+  const [title, setTitle] = useState(initialData?.title || initialData?.description || "");
   const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
   const [isPaid, setIsPaid] = useState(initialData?.is_paid ?? true);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-      e.preventDefault();
+    e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
 
-    setIsLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Usuário não logado");
-
-      // OPÇÃO 2 APLICADA AQUI NA HORA DE SALVAR NO BANCO:
+      // Montamos o payload respeitando o contrato da Entidade (Domain)
       const payload = {
-        user_id: session.user.id,
-        description: title, // <--- Salvamos a variável title dentro da coluna description
+        title: title, 
+        description: title, // Mantemos para não quebrar seu banco caso ainda não tenha a coluna title
         amount: Number.parseFloat(amount.replace(',', '.')),
         type: type,
         date: new Date(date).toISOString(),
         is_paid: isPaid,
+        currency: 'BRL', // A entidade exige a moeda
       };
 
-      if (isEditing) {
-        // Lógica de Atualizar
-        const { error } = await supabase.from('transactions').update(payload).eq('id', initialData.id);
-        if (error) throw error;
+      if (isEditing && initialData) {
+        await editTransaction(initialData.id, payload);
       } else {
-        // Lógica de Criar
-        const { error } = await supabase.from('transactions').insert(payload);
-        if (error) throw error;
+        await createTransaction(payload);
       }
 
       onSuccess(); // Sucesso! Avisa a página para fechar a gaveta e recarregar a lista.
@@ -69,15 +68,13 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
       console.error(error);
       const message = error instanceof Error ? error.message : "Erro desconhecido";
       alert("Erro ao salvar transação: " + message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const transactionTypeName = type === "INCOME" ? "Receita" : "Despesa";
 
   let submitButtonContent;
-  if (isLoading) {
+  if (isSubmitting) {
     submitButtonContent = <Loader2 className="animate-spin" />;
   } else if (isEditing) {
     submitButtonContent = "Guardar Alterações";
@@ -151,7 +148,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
       </div>
 
       <button 
-        disabled={isLoading}
+        disabled={isSubmitting}
         type="submit" 
         className={`w-full flex justify-center items-center gap-2 p-4 rounded-2xl font-bold text-white shadow-lg transition-transform active:scale-95 mt-4 ${typeClasses} disabled:opacity-50`}
       >

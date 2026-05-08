@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TransactionForm } from './transaction-form';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/infrastructure/supabase/supabase.client';
 
-jest.mock('@/lib/supabase', () => ({
+jest.mock('@/infrastructure/supabase/supabase.client', () => ({
   supabase: {
     auth: {
       getSession: jest.fn().mockResolvedValue({

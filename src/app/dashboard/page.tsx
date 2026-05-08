@@ -50,7 +50,7 @@ export default function DashboardPage() {
     if (!selectedTransaction) return;
     setActiveForm(selectedTransaction.type); // Abre o formulário como Renda ou Despesa
     setIsDetailOpen(false); // Fecha a gaveta de opções
-  };
+  }
 
   // Quando clica no botão "Excluir"
   const handleDelete = async () => {

@@ -1,5 +1,5 @@
-import { transactionRepository } from '../../../../infrastructure/supabase/transaction.repository';
-import { supabase } from '../../../../infrastructure/supabase/supabase.client';
+import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
+import { supabase } from '@/infrastructure/supabase/supabase.client';
 
 export async function deleteTransactionHandler(id: string): Promise<void> {
   // 1. Validação de Segurança

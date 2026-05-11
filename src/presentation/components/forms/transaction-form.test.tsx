@@ -95,7 +95,7 @@ describe('TransactionForm', () => {
     render(<TransactionForm {...defaultProps} initialData={initialData} />);
 
     expect(screen.getByDisplayValue('Rent')).toBeInTheDocument();
-    
+
     const submitButton = screen.getByRole('button', { name: /Guardar Alterações/i });
     fireEvent.click(submitButton);
 
@@ -110,10 +110,10 @@ describe('TransactionForm', () => {
     render(<TransactionForm {...defaultProps} />);
     const amountInput = screen.getByLabelText(/Valor da Receita/i);
     fireEvent.change(amountInput, { target: { value: '' } }); // Ensure it's empty
-    
+
     const submitButton = screen.getByRole('button', { name: /Confirmar/i });
     fireEvent.click(submitButton);
-    
+
     expect(window.alert).toHaveBeenCalledWith("Preencha o valor e o título!");
   });
 
@@ -126,76 +126,76 @@ describe('TransactionForm', () => {
       is_paid: true,
     };
     render(<TransactionForm {...defaultProps} initialData={initialData} />);
-    
+
     const titleInput = screen.getByLabelText(/Título/i);
     fireEvent.change(titleInput, { target: { value: '' } }); // Delete title
-    
+
     const submitButton = screen.getByRole('button', { name: /Guardar Alterações/i });
     fireEvent.click(submitButton);
-    
+
     expect(window.alert).toHaveBeenCalledWith("Preencha o valor e o título!");
   });
 
   it('should handle submission errors on create', async () => {
-  window.alert = jest.fn();
-  (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-  insert: jest.fn().mockReturnValue({
-    select: jest.fn().mockReturnValue({
-      single: jest.fn().mockRejectedValue(new Error('Database Error Create')),
-    }),
-  }),
-}));
+    window.alert = jest.fn();
+    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
+      insert: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockRejectedValue(new Error('Database Error Create')),
+        }),
+      }),
+    }));
 
-  render(<TransactionForm {...defaultProps} />);
-  fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
-  fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'Error Test' } });
+    render(<TransactionForm {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
+    fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'Error Test' } });
 
-  fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
 
-  await waitFor(() => {
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Database Error Create"));
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Database Error Create"));
+    });
   });
-});
 
   it('should handle submission errors on edit', async () => {
-  window.alert = jest.fn();
-  (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-  update: jest.fn().mockReturnValue({
-    eq: jest.fn().mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        single: jest.fn().mockRejectedValue(new Error('Database Error Update')),
+    window.alert = jest.fn();
+    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
+      update: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            single: jest.fn().mockRejectedValue(new Error('Database Error Update')),
+          }),
+        }),
       }),
-    }),
-  }),
-}));
+    }));
 
-  const initialData = {
-    id: '1',
-    amount: 500,
-    description: 'Rent',
-    date: '2023-01-01',
-    is_paid: true,
-  };
-  render(<TransactionForm {...defaultProps} initialData={initialData} />);
-  
-  fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '600' } });
+    const initialData = {
+      id: '1',
+      amount: 500,
+      description: 'Rent',
+      date: '2023-01-01',
+      is_paid: true,
+    };
+    render(<TransactionForm {...defaultProps} initialData={initialData} />);
 
-  fireEvent.click(screen.getByRole('button', { name: /Guardar Alterações/i }));
+    fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '600' } });
 
-  await waitFor(() => {
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Database Error Update"));
+    fireEvent.click(screen.getByRole('button', { name: /Guardar Alterações/i }));
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Database Error Update"));
+    });
   });
-});
 
   it('should toggle status', () => {
     render(<TransactionForm {...defaultProps} />);
-    
+
     const statusButton = screen.getByText('Pago').closest('button');
     expect(statusButton).toBeInTheDocument();
-    
+
     fireEvent.click(statusButton!);
     expect(screen.getByText('Pendente')).toBeInTheDocument();
-    
+
     fireEvent.click(statusButton!);
     expect(screen.getByText('Pago')).toBeInTheDocument();
   });
@@ -218,28 +218,28 @@ describe('TransactionForm', () => {
   });
 
   it('should handle non-Error objects thrown during submission', async () => {
-  (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-  insert: jest.fn().mockReturnValue({
-    select: jest.fn().mockReturnValue({
-      single: jest.fn().mockRejectedValue(new Error('String Error')),
-    }),
-  }),
-}));
+    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
+      insert: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockRejectedValue(new Error('String Error')),
+        }),
+      }),
+    }));
 
-  render(<TransactionForm {...defaultProps} />);
-  fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
-  fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'String Error Test' } });
+    render(<TransactionForm {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
+    fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'String Error Test' } });
 
-  fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
 
-  await waitFor(() => {
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("String Error"));
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("String Error"));
+    });
   });
-});
 
   it('should render correct text and styles for EXPENSE type', () => {
     render(<TransactionForm {...defaultProps} type="EXPENSE" />);
-    
+
     expect(screen.getByLabelText(/Valor da Despesa/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Confirmar Despesa/i })).toHaveClass('bg-red-500');
   });

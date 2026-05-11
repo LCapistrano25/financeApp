@@ -21,8 +21,9 @@ describe('useTransactions', () => {
       data: { session: { user: { id: '123' } } },
       error: null,
     });
-    
+
     const mockSelect = jest.fn().mockReturnThis();
+    const mockEq = jest.fn().mockReturnThis(); // Add this
     const mockGte = jest.fn().mockReturnThis();
     const mockLte = jest.fn().mockReturnThis();
     const mockOrder = jest.fn().mockResolvedValue({
@@ -36,6 +37,7 @@ describe('useTransactions', () => {
 
     (supabase.from as jest.Mock).mockImplementation(() => ({
       select: mockSelect,
+      eq: mockEq, // Add this line
       gte: mockGte,
       lte: mockLte,
       order: mockOrder,
@@ -87,6 +89,7 @@ describe('useTransactions', () => {
 
     (supabase.from as jest.Mock).mockImplementation(() => ({
       select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(), // Add this line
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
       order: mockOrder,

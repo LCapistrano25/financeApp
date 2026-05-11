@@ -47,7 +47,10 @@ describe('useAuth', () => {
     });
 
     const { result } = renderHook(() => useAuth());
-    
+    await waitFor(() => {
+      expect(result.current.logout).toBeDefined();
+    });
+
     await act(async () => {
       await result.current.logout();
     });

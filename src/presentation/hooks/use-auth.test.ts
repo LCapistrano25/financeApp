@@ -8,6 +8,12 @@ jest.mock('@/infrastructure/supabase/supabase.client', () => ({
     auth: {
       getSession: jest.fn(),
       signOut: jest.fn(),
+      onAuthStateChange: jest.fn((callback) => {
+        // Call the callback immediately with the mocked user
+        callback(null, { user: { id: 'user-1' } });
+        // Return an unsubscribe function
+        return { data: { subscription: { unsubscribe: jest.fn() } } };
+      }),
     },
   },
 }));
@@ -30,8 +36,9 @@ describe('useAuth', () => {
 
   it('should fetch user session on mount', async () => {
     const mockUser = { id: 'user-1' };
-    (supabase.auth.getSession as jest.Mock).mockResolvedValue({
-      data: { session: { user: mockUser } },
+    (supabase.auth.onAuthStateChange as jest.Mock).mockImplementation((callback) => {
+      callback(null, { user: mockUser });
+      return { data: { subscription: { unsubscribe: jest.fn() } } };
     });
 
     const { result } = renderHook(() => useAuth());

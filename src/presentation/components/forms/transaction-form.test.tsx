@@ -201,6 +201,8 @@ describe('TransactionForm', () => {
   });
 
   it('should handle missing session error', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+
     (supabase.auth.getSession as jest.Mock).mockResolvedValueOnce({
       data: { session: null },
       error: null,
@@ -215,6 +217,32 @@ describe('TransactionForm', () => {
     await waitFor(() => {
       expect(window.alert).toHaveBeenCalledWith("Erro ao salvar transação: Usuário não logado");
     });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle non-Error objects thrown during submission', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+
+    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
+      insert: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockRejectedValue(new Error('String Error')),
+        }),
+      }),
+    }));
+
+    render(<TransactionForm {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
+    fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'String Error Test' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("String Error"));
+    });
+
+    consoleSpy.mockRestore();
   });
 
   it('should handle non-Error objects thrown during submission', async () => {

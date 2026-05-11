@@ -138,7 +138,7 @@ export default function DashboardPage() {
                   incomes.map((item) => (
                     <TransactionCard
                       key={item.id}
-                      title={item.title || item.description || "Renda"}
+                      title={item.description || "Renda"}
                       category={item.category?.name || "Sem categoria"}
                       amount={item.amount}
                       type="income"
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                   expenses.map((item) => (
                     <TransactionCard
                       key={item.id}
-                      title={item.title || item.description || "Conta"}
+                      title={item.description || "Conta"}
                       category={item.category?.name || "Sem categoria"}
                       amount={item.amount}
                       type="expense"
@@ -193,7 +193,7 @@ export default function DashboardPage() {
       <BottomSheet 
         isOpen={isDetailOpen} 
         onClose={() => setIsDetailOpen(false)} 
-        title={selectedTransaction?.title || selectedTransaction?.description || "Detalhes"}
+        title={selectedTransaction?.description || "Detalhes"}
       >
         <div className="flex flex-col gap-3 pb-4">
           <button 

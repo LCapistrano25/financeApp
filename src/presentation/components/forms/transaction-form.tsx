@@ -13,7 +13,6 @@ type TransactionFormInitialData = {
   readonly id: Transaction["id"];
   readonly amount: Transaction["amount"];
   readonly description?: Transaction["description"];
-  readonly title?: Transaction["title"];
   readonly date: Transaction["date"];
   readonly is_paid: Transaction["is_paid"];
 };
@@ -36,7 +35,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
   const [amount, setAmount] = useState(initialData?.amount?.toString() || "");
   
   // Puxamos 'title' se existir, ou o fallback 'description'
-  const [title, setTitle] = useState(initialData?.title || initialData?.description || "");
+  const [title, setTitle] = useState(initialData?.description || "");
   const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
   const [isPaid, setIsPaid] = useState(initialData?.is_paid ?? true);
 
@@ -47,7 +46,6 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     try {
       // Montamos o payload respeitando o contrato da Entidade (Domain)
       const payload = {
-        title: title, 
         description: title, // Mantemos para não quebrar seu banco caso ainda não tenha a coluna title
         amount: Number.parseFloat(amount.replace(',', '.')),
         type: type,

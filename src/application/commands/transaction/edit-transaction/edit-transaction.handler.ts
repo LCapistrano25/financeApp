@@ -15,13 +15,6 @@ export async function editTransactionHandler(id: string, input: EditTransactionI
   // Fazemos uma cópia do input para não modificar o objeto original
   const payloadToUpdate = { ...input };
 
-  // Se o título vier no payload, nós o excluímos, pois o banco 
-  // do Supabase não possui essa coluna. Nós já garantimos no
-  // formulário que o texto do title foi copiado para description.
-  if ('title' in payloadToUpdate) {
-    delete payloadToUpdate.title;
-  }
-
   // 3. Execução
   const updatedTransaction = await transactionRepository.updateTransaction(id, payloadToUpdate);
 

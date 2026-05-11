@@ -16,12 +16,6 @@ export async function createTransactionHandler(input: CreateTransactionInput): P
     user_id: session.user.id,
   };
 
-  // Removemos a coluna que não existe no banco
-  // O TypeScript vai reclamar um pouco porque title é obrigatório no Omit, 
-  // então usamos um as any temporário ou apenas deletamos a chave
-  if ('title' in payloadToInsert) {
-     delete (payloadToInsert as any).title; 
-  }
 
   const newTransaction = await transactionRepository.createTransaction(payloadToInsert);
 

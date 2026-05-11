@@ -1,31 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TransactionForm } from './transaction-form';
-import { supabase } from '@/infrastructure/supabase/supabase.client';
+// IMPORTAMOS OS NOSSOS HOOKS PARA PODER FAZER O MOCK DELES
+import { useCreateTransaction } from '@/presentation/hooks/use-create-transaction';
+import { useEditTransaction } from '@/presentation/hooks/use-edit-transaction';
 
-jest.mock('@/infrastructure/supabase/supabase.client', () => ({
-  supabase: {
-    auth: {
-      getSession: jest.fn().mockResolvedValue({
-        data: { session: { user: { id: 'user-123' } } },
-        error: null,
-      }),
-    },
-    from: jest.fn(() => ({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockResolvedValue({ data: {}, error: null }),
-        }),
-      }),
-      update: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: {}, error: null }),
-          }),
-        }),
-      }),
-    })),
-  },
+// 1. Mockamos os hooks em vez do Supabase
+jest.mock('@/presentation/hooks/use-create-transaction', () => ({
+  useCreateTransaction: jest.fn(),
+}));
+
+jest.mock('@/presentation/hooks/use-edit-transaction', () => ({
+  useEditTransaction: jest.fn(),
 }));
 
 describe('TransactionForm', () => {
@@ -34,9 +20,29 @@ describe('TransactionForm', () => {
     onSuccess: jest.fn(),
   };
 
+  // Preparamos as funções falsas (mocks) que vão imitar o retorno dos hooks
+  const mockCreateTransaction = jest.fn();
+  const mockEditTransaction = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
     window.alert = jest.fn();
+    console.error = jest.fn(); // Silencia os erros esperados no console durante os testes
+
+    // Configuramos o retorno padrão dos hooks antes de cada teste
+    (useCreateTransaction as jest.Mock).mockReturnValue({
+      createTransaction: mockCreateTransaction,
+      isLoading: false,
+    });
+
+    (useEditTransaction as jest.Mock).mockReturnValue({
+      editTransaction: mockEditTransaction,
+      isLoading: false,
+    });
+    
+    // Sucesso padrão
+    mockCreateTransaction.mockResolvedValue({});
+    mockEditTransaction.mockResolvedValue({});
   });
 
   afterEach(() => {
@@ -79,7 +85,8 @@ describe('TransactionForm', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith('transactions');
+      // Verificamos se o HOOK foi chamado (não mais o Supabase)
+      expect(mockCreateTransaction).toHaveBeenCalled();
       expect(defaultProps.onSuccess).toHaveBeenCalled();
     });
   });
@@ -100,21 +107,22 @@ describe('TransactionForm', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith('transactions');
+      // Verificamos se o HOOK de edição foi chamado
+      expect(mockEditTransaction).toHaveBeenCalledWith('1', expect.any(Object));
       expect(defaultProps.onSuccess).toHaveBeenCalled();
     });
   });
 
   it('should show alert when title or amount is missing (create)', () => {
-    // We add noValidate to bypass browser validation in test
     render(<TransactionForm {...defaultProps} />);
-    const amountInput = screen.getByLabelText(/Valor da Receita/i);
-    fireEvent.change(amountInput, { target: { value: '' } }); // Ensure it's empty
-
-    const submitButton = screen.getByRole('button', { name: /Confirmar/i });
+    
+    // Tentamos enviar sem preencher nada
+    const submitButton = screen.getByRole('button', { name: /Confirmar Receita/i });
     fireEvent.click(submitButton);
 
     expect(window.alert).toHaveBeenCalledWith("Preencha o valor e o título!");
+    // O hook não deve ser chamado
+    expect(mockCreateTransaction).not.toHaveBeenCalled();
   });
 
   it('should show alert when title or amount is missing (edit)', () => {
@@ -137,37 +145,24 @@ describe('TransactionForm', () => {
   });
 
   it('should handle submission errors on create', async () => {
-    window.alert = jest.fn();
-    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockRejectedValue(new Error('Database Error Create')),
-        }),
-      }),
-    }));
+    // Forçamos o hook a retornar um erro
+    mockCreateTransaction.mockRejectedValue(new Error('Erro no hook create'));
 
     render(<TransactionForm {...defaultProps} />);
     fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
     fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'Error Test' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar Receita/i }));
 
     await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Database Error Create"));
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Erro no hook create"));
+      expect(defaultProps.onSuccess).not.toHaveBeenCalled();
     });
   });
 
   it('should handle submission errors on edit', async () => {
-    window.alert = jest.fn();
-    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-      update: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockRejectedValue(new Error('Database Error Update')),
-          }),
-        }),
-      }),
-    }));
+    // Forçamos o hook a retornar um erro
+    mockEditTransaction.mockRejectedValue(new Error('Erro no hook update'));
 
     const initialData = {
       id: '1',
@@ -183,7 +178,7 @@ describe('TransactionForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /Guardar Alterações/i }));
 
     await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Database Error Update"));
+      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Erro no hook update"));
     });
   });
 
@@ -200,75 +195,32 @@ describe('TransactionForm', () => {
     expect(screen.getByText('Pago')).toBeInTheDocument();
   });
 
-  it('should handle missing session error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
-
-    (supabase.auth.getSession as jest.Mock).mockResolvedValueOnce({
-      data: { session: null },
-      error: null,
-    });
-
-    render(<TransactionForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
-    fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'No Session Test' } });
-
-    fireEvent.click(screen.getByRole('button', { name: /Confirmar Receita/i }));
-
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith("Erro ao salvar transação: Usuário não logado");
-    });
-
-    consoleSpy.mockRestore();
-  });
-
-  it('should handle non-Error objects thrown during submission', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
-
-    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockRejectedValue(new Error('String Error')),
-        }),
-      }),
-    }));
-
-    render(<TransactionForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
-    fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'String Error Test' } });
-
-    fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
-
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("String Error"));
-    });
-
-    consoleSpy.mockRestore();
-  });
-
-  it('should handle non-Error objects thrown during submission', async () => {
-    (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-      insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          single: jest.fn().mockRejectedValue(new Error('String Error')),
-        }),
-      }),
-    }));
-
-    render(<TransactionForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
-    fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'String Error Test' } });
-
-    fireEvent.click(screen.getByRole('button', { name: /Confirmar/i }));
-
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("String Error"));
-    });
-  });
-
   it('should render correct text and styles for EXPENSE type', () => {
     render(<TransactionForm {...defaultProps} type="EXPENSE" />);
 
     expect(screen.getByLabelText(/Valor da Despesa/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Confirmar Despesa/i })).toHaveClass('bg-red-500');
+  });
+  
+  it('should show loading spinner when submitting', () => {
+     // Forçamos o hook a estar em estado de loading
+    (useCreateTransaction as jest.Mock).mockReturnValue({
+        createTransaction: mockCreateTransaction,
+        isLoading: true, // Aqui simulamos a demora do backend
+    });
+
+    render(<TransactionForm {...defaultProps} />);
+    
+    // Pegamos todos os botões renderizados na tela
+    const buttons = screen.getAllByRole('button');
+    
+    // Encontramos especificamente o botão de enviar o formulário (type="submit")
+    const submitButton = buttons.find(b => b.getAttribute('type') === 'submit');
+
+    // O botão deve estar desabilitado
+    expect(submitButton).toBeDisabled();
+    
+    // E não deve ter o texto "Confirmar Receita", pois está renderizando o ícone de Loader
+    expect(screen.queryByText(/Confirmar Receita/i)).not.toBeInTheDocument();
   });
 });

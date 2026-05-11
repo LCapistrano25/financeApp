@@ -13,11 +13,15 @@ jest.mock('@/infrastructure/supabase/supabase.client', () => ({
     },
     from: jest.fn(() => ({
       insert: jest.fn().mockReturnValue({
-        select: jest.fn().mockResolvedValue({ data: {}, error: null }),
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({ data: {}, error: null }),
+        }),
       }),
       update: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
-          select: jest.fn().mockResolvedValue({ data: {}, error: null }),
+          select: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({ data: {}, error: null }),
+          }),
         }),
       }),
     })),
@@ -135,10 +139,12 @@ describe('TransactionForm', () => {
   it('should handle submission errors on create', async () => {
   window.alert = jest.fn();
   (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-    insert: jest.fn().mockReturnValue({
-      select: jest.fn().mockRejectedValue(new Error('Database Error Create')),
+  insert: jest.fn().mockReturnValue({
+    select: jest.fn().mockReturnValue({
+      single: jest.fn().mockRejectedValue(new Error('Database Error Create')),
     }),
-  }));
+  }),
+}));
 
   render(<TransactionForm {...defaultProps} />);
   fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
@@ -154,12 +160,14 @@ describe('TransactionForm', () => {
   it('should handle submission errors on edit', async () => {
   window.alert = jest.fn();
   (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-    update: jest.fn().mockReturnValue({
-      eq: jest.fn().mockReturnValue({
-        select: jest.fn().mockRejectedValue(new Error('Database Error Update')),
+  update: jest.fn().mockReturnValue({
+    eq: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        single: jest.fn().mockRejectedValue(new Error('Database Error Update')),
       }),
     }),
-  }));
+  }),
+}));
 
   const initialData = {
     id: '1',
@@ -211,10 +219,12 @@ describe('TransactionForm', () => {
 
   it('should handle non-Error objects thrown during submission', async () => {
   (supabase.from as jest.Mock).mockImplementationOnce(() => ({
-    insert: jest.fn().mockReturnValue({
-      select: jest.fn().mockRejectedValue(new Error('String Error')), // Use Error object
+  insert: jest.fn().mockReturnValue({
+    select: jest.fn().mockReturnValue({
+      single: jest.fn().mockRejectedValue(new Error('String Error')),
     }),
-  }));
+  }),
+}));
 
   render(<TransactionForm {...defaultProps} />);
   fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });

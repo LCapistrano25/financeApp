@@ -7,7 +7,7 @@ export function useDeleteTransaction() {
 
   const deleteTransaction = async (id: string) => {
     // Alerta de segurança nativo do navegador (opcional, você pode usar um Modal na UI se preferir)
-    const confirmDelete = window.confirm("Tem certeza que deseja apagar esta transação?");
+    const confirmDelete = globalThis.confirm("Tem certeza que deseja apagar esta transação?");
     if (!confirmDelete) return false;
 
     setIsLoading(true);

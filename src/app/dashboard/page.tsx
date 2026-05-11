@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Pencil, Trash2, Minus, Plus} from "lucide-react";
+import { Loader2, Pencil, Trash2, Minus, Plus } from "lucide-react";
 import { SummaryCard } from "@/presentation/components/cards/summary-card";
 import { TransactionCard } from "@/presentation/components/cards/transaction-card";
 import { BottomSheet } from "@/presentation/components/mobile/bottom-sheet";
@@ -18,11 +18,11 @@ function getCurrentMonthYear() {
 }
 
 export default function DashboardPage() {
-  const [currentDate, setCurrentDate] = useState(getCurrentMonthYear); 
-  
+  const [currentDate, setCurrentDate] = useState(getCurrentMonthYear);
+
   // 1. Hook de listagem
   const { transactions, totals, isLoading, error, refresh } = useTransactions(currentDate);
-  
+
   // 2. Hook de exclusão (Limpo e isolado)
   const { deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
 
@@ -47,18 +47,18 @@ export default function DashboardPage() {
 
   const handleOpenEdit = () => {
     if (!selectedTransaction) return;
-    setActiveForm(selectedTransaction.type); 
-    setIsDetailOpen(false); 
+    setActiveForm(selectedTransaction.type);
+    setIsDetailOpen(false);
   }
 
   // --- A MÁGICA DA EXCLUSÃO ACONTECE AQUI ---
   const handleDelete = async () => {
     if (!selectedTransaction) return;
-    
+
     // O hook de delete já tem o confirm nativo (ou você pode manter o seu aqui)
     try {
       const success = await deleteTransaction(selectedTransaction.id);
-      
+
       if (success) {
         setIsDetailOpen(false); // Fecha a gaveta
         refresh(); // Atualiza a tela sem dar F5
@@ -80,7 +80,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col flex-1 bg-transparent text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <main className="flex-1 px-4 py-8 mx-auto w-full max-w-3xl">
-        
+
         <h2 className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-2">
           Mês de referência:
         </h2>
@@ -88,10 +88,14 @@ export default function DashboardPage() {
         {/* SELETOR DE MÊS */}
         <div className="relative mb-6">
           <label className="flex items-center justify-center w-full rounded-xl bg-white dark:bg-slate-900 p-3 shadow-sm border border-gray-100 dark:border-slate-800 font-medium text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            <input 
-              type="month" 
+
+            <span className="sr-only">Selecionar mês</span>
+
+            <input
+              type="month"
               value={currentDate}
               onChange={(e) => setCurrentDate(e.target.value)}
+              aria-label="Selecionar mês"
               className="bg-transparent outline-none cursor-pointer w-auto text-center color-transparent"
             />
           </label>
@@ -117,13 +121,13 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-8">
-              <button 
+              <button
                 onClick={() => { setActiveForm('INCOME'); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm font-bold text-xl"
               >
                 <Plus className="w-6 h-6" />
               </button>
-              <button 
+              <button
                 onClick={() => { setActiveForm('EXPENSE'); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm font-bold text-xl"
               >
@@ -172,39 +176,39 @@ export default function DashboardPage() {
         )}
       </main>
 
-      <BottomSheet 
-        isOpen={!!activeForm} 
+      <BottomSheet
+        isOpen={!!activeForm}
         onClose={() => { setActiveForm(null); setSelectedTransaction(null); }}
         title={formTitle}
       >
         {activeForm && (
-          <TransactionForm 
-            type={activeForm} 
+          <TransactionForm
+            type={activeForm}
             initialData={selectedTransaction ?? undefined}
-            onSuccess={() => { 
-              setActiveForm(null); 
+            onSuccess={() => {
+              setActiveForm(null);
               setSelectedTransaction(null);
-              refresh(); 
-            }} 
+              refresh();
+            }}
           />
         )}
       </BottomSheet>
 
-      <BottomSheet 
-        isOpen={isDetailOpen} 
-        onClose={() => setIsDetailOpen(false)} 
+      <BottomSheet
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
         title={selectedTransaction?.description || "Detalhes"}
       >
         <div className="flex flex-col gap-3 pb-4">
-          <button 
+          <button
             onClick={handleOpenEdit}
             className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white p-4 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
           >
             <Pencil className="w-5 h-5" />
             Editar Transação
           </button>
-          
-          <button 
+
+          <button
             onClick={handleDelete}
             disabled={isDeleting} // <-- Previne duplo clique enquanto deleta!
             className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/30 text-red-600 p-4 rounded-xl font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
@@ -214,7 +218,7 @@ export default function DashboardPage() {
           </button>
         </div>
       </BottomSheet>
-      
+
     </div>
   );
 }

@@ -35,10 +35,13 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     setIsLoading(true);
     setError(null);
+
     try {
-      const redirectTo = typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback`
-        : "/auth/callback";
+      let redirectTo = "/auth/callback";
+
+      if (typeof globalThis !== "undefined" && globalThis.location) {
+        redirectTo = `${globalThis.location.origin}/auth/callback`;
+      }
 
       await loginWithGoogleHandler(redirectTo);
     } catch (err: unknown) {
@@ -52,11 +55,11 @@ export function useAuth() {
     setIsLoading(true);
     try {
       await logoutHandler();
-      setUser(null); 
-      
+      setUser(null);
+
       // 3. AGORA SIM, FORÇAMOS O REDIRECIONAMENTO!
-      router.push('/auth/login'); 
-      
+      router.push('/auth/login');
+
     } catch (err) {
       console.error("Erro ao deslogar", err);
       setError("Falha ao sair da conta.");

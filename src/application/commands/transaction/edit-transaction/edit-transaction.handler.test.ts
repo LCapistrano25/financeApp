@@ -1,5 +1,4 @@
 import { editTransactionHandler } from './edit-transaction.handler';
-import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
 import { supabase } from '@/infrastructure/supabase/supabase.client';
 
 jest.mock('@/infrastructure/supabase/transaction.repository', () => ({

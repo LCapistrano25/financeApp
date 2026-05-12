@@ -55,7 +55,7 @@ src/
 ```
 ---
 
-## 🚀 Como Executar o Projeto
+## Como Executar o Projeto
 
 ### Pré-requisitos
 
@@ -98,7 +98,7 @@ npm run dev
 
 ---
 
-## 🧪 Testes e Integração Contínua (CI)
+## Testes e Integração Contínua (CI)
 
 O projeto conta com uma pipeline de Integração Contínua (CI) robusta e automatizada, garantindo que nenhum código suba para produção sem passar por rigorosos critérios de qualidade e segurança de software. Para garantir a qualidade do código antes de realizar commits, utilize os comandos locais abaixo:
 

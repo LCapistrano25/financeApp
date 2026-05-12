@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/presentation/hooks/use-auth";
 
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -13,26 +12,8 @@ const GoogleIcon = () => (
 );
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      const redirectTo = typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback`
-        : "/auth/callback";
-
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-        },
-      });
-    } catch (error) {
-      console.error("Error signing in with Google:", error);
-      setIsLoading(false);
-    }
-  };
+  // Importamos a função e os estados do nosso hook limpo
+  const { loginWithGoogle, isLoading, error } = useAuth();
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#f8f9fa] px-4">
@@ -49,11 +30,11 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="w-full flex justify-center">
+        <div className="w-full flex flex-col justify-center gap-2">
           <button
-            onClick={handleGoogleLogin}
+            onClick={loginWithGoogle}
             disabled={isLoading}
-            className="flex w-full max-w-[280px] h-14 items-center justify-center gap-3 rounded-[20px] bg-[#1e293b] px-2 py-2 text-[15px] font-semibold text-white transition-all hover:bg-[#334155] focus:outline-none focus:ring-2 focus:ring-[#1e293b] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-md"
+            className="flex w-full max-w-[280px] mx-auto h-14 items-center justify-center gap-3 rounded-[20px] bg-[#1e293b] px-2 py-2 text-[15px] font-semibold text-white transition-all hover:bg-[#334155] focus:outline-none focus:ring-2 focus:ring-[#1e293b] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-md"
           >
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
@@ -64,12 +45,15 @@ export default function LoginPage() {
             )}
             Entrar com Google
           </button>
+          
+          {/* Mostra mensagem de erro se a autenticação falhar */}
+          {error && <p className="text-red-500 text-sm text-center font-medium mt-2">{error}</p>}
         </div>
       </div>
 
       <div className="pb-8">
         <p className="text-[13px] text-[#94a3b8] text-center">
-          Seus dados são armazenados de forma segura no seu Google Drive.
+          Seus dados são armazenados de forma segura na nuvem.
         </p>
       </div>
     </div>

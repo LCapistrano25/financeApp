@@ -1,13 +1,13 @@
 // 1. Definimos os objetos globais PRIMEIRO
 global.Request = jest.fn() as unknown as typeof Request;
 global.Response = jest.fn() as unknown as typeof Response;
-global.Headers = jest.fn() as unknown as typeof Headers; // Adicionei Headers por garantia!
+global.Headers = jest.fn() as unknown as typeof Headers;
 
 describe('Proxy / Middleware', () => {
-  it('o arquivo de proxy deve ser importado e definido corretamente', () => {
-    // 2. Importamos o arquivo DINAMICAMENTE dentro do teste
-    // Isso impede o JavaScript de tentar carregar o arquivo antes dos globais existirem
-    const proxy = require('./proxy');
+  // ATENÇÃO: Adicionamos o "async" aqui
+  it('o arquivo de proxy deve ser importado e definido corretamente', async () => {
+    // 2. Importamos o arquivo DINAMICAMENTE usando o padrão moderno (ES Modules)
+    const proxy = await import('./proxy');
     
     expect(proxy).toBeDefined();
   });

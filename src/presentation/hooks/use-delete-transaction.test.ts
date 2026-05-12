@@ -6,33 +6,44 @@ jest.mock('@/application/commands/transaction/delete-transaction/delete-transact
 
 describe('useDeleteTransaction', () => {
   beforeEach(() => {
-    // Finge que o usuário sempre clica em "OK" no window.confirm
-    window.confirm = jest.fn().mockReturnValue(true);
+    jest.clearAllMocks();
+    // Previne que qualquer confirm residual bloqueie o teste
+    jest.spyOn(window, 'confirm').mockReturnValue(true);
   });
 
-  it('deve deletar uma transação com sucesso', async () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('deve deletar uma transação e gerenciar o loading', async () => {
     (deleteTransactionHandler as jest.Mock).mockResolvedValue(undefined);
     
     const { result } = renderHook(() => useDeleteTransaction());
 
-    let success;
-    await act(async () => {
-      success = await result.current.deleteTransaction('tx-1');
-    });
-
-    expect(success).toBe(true);
-    expect(deleteTransactionHandler).toHaveBeenCalledWith('tx-1');
-  });
-
-  it('não deve fazer nada se o usuário cancelar o confirm', async () => {
-    window.confirm = jest.fn().mockReturnValue(false);
-    
-    const { result } = renderHook(() => useDeleteTransaction());
+    expect(result.current.isLoading).toBe(false);
 
     await act(async () => {
       await result.current.deleteTransaction('tx-1');
     });
 
-    expect(deleteTransactionHandler).not.toHaveBeenCalled();
+    expect(deleteTransactionHandler).toHaveBeenCalledWith('tx-1');
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('deve gerenciar estado de erro em caso de falha', async () => {
+    (deleteTransactionHandler as jest.Mock).mockRejectedValue(new Error('Erro ao deletar'));
+    
+    const { result } = renderHook(() => useDeleteTransaction());
+
+    await act(async () => {
+      try {
+        await result.current.deleteTransaction('tx-1');
+      } catch {
+        // Ignoramos o throw no teste para checar o state
+      }
+    });
+
+    expect(result.current.error).toBe('Erro ao deletar');
+    expect(result.current.isLoading).toBe(false);
   });
 });

@@ -18,7 +18,7 @@ describe('AuthRepository', () => {
   it('deve realizar login com google com sucesso', async () => {
     (supabase.auth.signInWithOAuth as jest.Mock).mockResolvedValue({ error: null });
     
-    const mockRedirect = 'http://any-url.com/callback';
+    const mockRedirect = 'https://any-url.com/callback';
     await authRepository.signInWithGoogle(mockRedirect);
     
     expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({

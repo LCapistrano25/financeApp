@@ -8,8 +8,8 @@ jest.mock('../../../infrastructure/supabase/auth.repository', () => ({
 }));
 
 describe('loginWithGoogleHandler', () => {
-  it('deve chamar o repositório de autenticação com a URL de redirecionamento', async () => {
-    const redirectTo = 'http://localhost:3000/auth/callback';
+  it('deve chamar o repositório de autenticação com a URL de redirecionamento fornecida', async () => {
+    const redirectTo = 'http://any-redirect-url.com/auth/callback';
     
     await loginWithGoogleHandler(redirectTo);
     

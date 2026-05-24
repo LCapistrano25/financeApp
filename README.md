@@ -86,6 +86,7 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=seu_url_do_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
 NEXT_PUBLIC_API_URL=http://localhost:8000 # URL do motor FastAPI
+NEXT_PUBLIC_AUTH_REDIRECT_URL=http://localhost:3000/auth/callback # URL de redirecionamento após login (Obrigatório para AWS/Prod)
 
 ```
 

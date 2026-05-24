@@ -37,9 +37,11 @@ export function useAuth() {
     setError(null);
 
     try {
-      let redirectTo = "/auth/callback";
+      // Usamos variável de ambiente para o redirecionamento, fallback para origin se não definida
+      const envRedirect = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL;
+      let redirectTo = envRedirect || "/auth/callback";
 
-      if (typeof globalThis !== "undefined" && globalThis.location) {
+      if (!envRedirect && typeof globalThis !== "undefined" && globalThis.location) {
         redirectTo = `${globalThis.location.origin}/auth/callback`;
       }
 

@@ -6,10 +6,14 @@ export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
 
+    // Redirecionamento correto para ambientes hospedados (Vercel, etc)
+    // Se estivermos em produção, precisamos garantir que o redirecionamento não vá para localhost
+    const origin = requestUrl.origin;
+
     if (code) {
         const cookieStore = await cookies();
         const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
+            process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_API_URL || "https://placeholder.supabase.co",
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder",
             {
                 cookies: {
@@ -27,5 +31,5 @@ export async function GET(request: Request) {
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+    return NextResponse.redirect(`${origin}/dashboard`);
 }

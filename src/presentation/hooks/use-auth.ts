@@ -38,17 +38,21 @@ export function useAuth() {
 
     try {
       // Simplificamos a lógica de redirecionamento:
-      // Se houver uma variável de ambiente, usamos ela.
-      // Se ela for um caminho relativo, transformamos em absoluta usando o origin atual.
+      // Se houver uma variável de ambiente, usamos ela como base.
+      // Caso contrário, usamos o origin atual.
       const envRedirect = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL;
       const origin = typeof window !== "undefined" ? window.location.origin : '';
       
-      let redirectTo = envRedirect || `${origin}/auth/callback`;
+      let baseRedirect = envRedirect || origin;
       
-      // Garante que a URL seja absoluta (Supabase exige isso para OAuth)
-      if (redirectTo.startsWith('/')) {
-        redirectTo = `${origin}${redirectTo}`;
-      }
+      // Remove barra ao final se existir para evitar duplicação
+      baseRedirect = baseRedirect.replace(/\/$/, '');
+
+      // SEMPRE garantimos que o caminho seja /auth/callback
+      // Se a variável já tiver o caminho, não duplicamos
+      const redirectTo = baseRedirect.includes('/auth/callback') 
+        ? baseRedirect 
+        : `${baseRedirect}/auth/callback`;
 
       await loginWithGoogleHandler(redirectTo);
     } catch (err: unknown) {

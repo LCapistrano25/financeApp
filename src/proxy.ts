@@ -25,19 +25,28 @@ async function proxy(req: NextRequest) {
     );
 
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
+    if (!user && req.nextUrl.pathname.startsWith('/dashboard')) {
         const redirectUrl = req.nextUrl.clone();
         redirectUrl.pathname = '/auth/login';
-        return NextResponse.redirect(redirectUrl);
+        const response = NextResponse.redirect(redirectUrl);
+        res.cookies.getAll().forEach((cookie) => {
+            response.cookies.set(cookie.name, cookie.value);
+        });
+        return response;
     }
 
-    if (session && req.nextUrl.pathname.startsWith('/auth/login')) {
+    if (user && req.nextUrl.pathname.startsWith('/auth/login')) {
         const redirectUrl = req.nextUrl.clone();
         redirectUrl.pathname = '/dashboard';
-        return NextResponse.redirect(redirectUrl);
+        const response = NextResponse.redirect(redirectUrl);
+        // Garante que os cookies sejam passados
+        res.cookies.getAll().forEach((cookie) => {
+            response.cookies.set(cookie.name, cookie.value);
+        });
+        return response;
     }
 
     return res;

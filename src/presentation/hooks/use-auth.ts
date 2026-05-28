@@ -37,12 +37,28 @@ export function useAuth() {
     setError(null);
 
     try {
-      // Usamos variável de ambiente para o redirecionamento, fallback para origin se não definida
+      // Lógica dinâmica para redirecionamento:
+      // 1. Tenta usar a variável de ambiente se ela existir.
+      // 2. Se estivermos no navegador, SEMPRE usamos o origin atual como base,
+      //    a menos que a variável de ambiente explicitamente aponte para um domínio de produção.
       const envRedirect = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL;
-      let redirectTo = envRedirect || "/auth/callback";
+      let redirectTo = "/auth/callback";
 
-      if (!envRedirect && typeof globalThis !== "undefined" && globalThis.location) {
-        redirectTo = `${globalThis.location.origin}/auth/callback`;
+      if (typeof window !== "undefined") {
+        const isCurrentlyLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        if (envRedirect && envRedirect.startsWith('http')) {
+          // Se a env existe e estamos local, ou se a env não é localhost, usamos ela
+          if (isCurrentlyLocal || !envRedirect.includes('localhost')) {
+            redirectTo = envRedirect;
+          } else {
+            // Se estamos em prod mas a env diz localhost, forçamos o origin correto
+            redirectTo = `${window.location.origin}/auth/callback`;
+          }
+        } else {
+          // Se não tem env ou é caminho relativo, usa o origin atual
+          redirectTo = `${window.location.origin}/auth/callback`;
+        }
       }
 
       await loginWithGoogleHandler(redirectTo);

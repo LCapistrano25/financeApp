@@ -1,4 +1,5 @@
-import { TransactionType, RepeatFrequency } from '../value-objects/transaction-type';
+import { RepeatFrequency } from '../enum/repeat-frequency';
+import { TransactionType } from '../enum/transaction-type';
 
 export interface Transaction {
   id: string;

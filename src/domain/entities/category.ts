@@ -1,4 +1,4 @@
-import { TransactionType } from '../value-objects/transaction-type';
+import { TransactionType } from '../enum/transaction-type';
 
 export interface Category {
   id: string;

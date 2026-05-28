@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     if (code) {
         const cookieStore = await cookies();
         const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_API_URL || "https://placeholder.supabase.co",
+            process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder",
             {
                 cookies: {
@@ -31,5 +31,7 @@ export async function GET(request: Request) {
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    return NextResponse.redirect(`${origin}/dashboard`);
+    // URL absoluta para evitar problemas com proxies
+    const redirectUrl = new URL('/dashboard', origin);
+    return NextResponse.redirect(redirectUrl);
 }

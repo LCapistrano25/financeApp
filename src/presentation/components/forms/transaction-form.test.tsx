@@ -6,11 +6,11 @@ import { useCreateTransaction } from '@/presentation/hooks/transaction/create-tr
 import { useEditTransaction } from '@/presentation/hooks/transaction/edit-transaction/use-edit-transaction';
 
 // 1. Mockamos os hooks em vez do Supabase
-jest.mock('@/presentation/hooks/use-create-transaction', () => ({
+jest.mock('@/presentation/hooks/transaction/create-transaction/use-create-transaction', () => ({
   useCreateTransaction: jest.fn(),
 }));
 
-jest.mock('@/presentation/hooks/use-edit-transaction', () => ({
+jest.mock('@/presentation/hooks/transaction/edit-transaction/use-edit-transaction', () => ({
   useEditTransaction: jest.fn(),
 }));
 

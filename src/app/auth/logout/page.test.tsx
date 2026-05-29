@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import LogoutPage from './page';
 
-jest.mock('@/presentation/hooks/use-auth', () => ({
+jest.mock('@/presentation/hooks/auth/use-auth', () => ({
   useAuth: () => ({ logout: jest.fn() }),
 }));
 

@@ -7,7 +7,7 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn().mockReturnValue({ push: jest.fn() }),
 }));
 
-jest.mock('@/presentation/hooks/use-auth', () => ({
+jest.mock('@/presentation/hooks/auth/use-auth', () => ({
   useAuth: () => ({ user: { id: '123' }, isLoading: false }),
 }));
 

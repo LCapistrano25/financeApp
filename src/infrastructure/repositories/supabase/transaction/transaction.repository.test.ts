@@ -3,7 +3,7 @@ import { TransactionRepository } from './transaction.repository';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 
 // Criamos um mock universal para simular a sintaxe encadeada do Supabase
-jest.mock('./supabase.client', () => {
+jest.mock('../supabase.client', () => {
     const mockQuery = {
         select: jest.fn().mockReturnThis(),
         insert: jest.fn().mockReturnThis(),

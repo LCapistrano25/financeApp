@@ -3,7 +3,7 @@ import { useAuth } from './use-auth';
 import { supabase } from '@/infrastructure/repositories/supabase/supabase.client';
 import { useRouter } from 'next/navigation';
 
-jest.mock('@/infrastructure/supabase/supabase.client', () => ({
+jest.mock('@/infrastructure/repositories/supabase/supabase.client', () => ({
   supabase: {
     auth: {
       getSession: jest.fn().mockResolvedValue({

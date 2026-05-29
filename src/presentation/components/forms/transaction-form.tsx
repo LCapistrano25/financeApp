@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { TransactionType } from "@/domain/enum/transaction-type";
 
-// IMPORTAMOS OS NOSSOS HOOKS DE CASO DE USO
 import { useCreateTransaction } from "@/presentation/hooks/transaction/create-transaction/use-create-transaction";
 import { useEditTransaction } from "@/presentation/hooks/transaction/edit-transaction/use-edit-transaction";
 
@@ -26,15 +25,12 @@ type TransactionFormProps = Readonly<{
 export function TransactionForm({ type, initialData, onSuccess }: TransactionFormProps) {
   const isEditing = !!initialData;
 
-  // INICIAMOS OS HOOKS
   const { createTransaction, isLoading: isCreating } = useCreateTransaction();
   const { editTransaction, isLoading: isUpdating } = useEditTransaction();
-  const isSubmitting = isCreating || isUpdating; // Unifica o estado de loading
+  const isSubmitting = isCreating || isUpdating;
 
-  // Estados do formulário
   const [amount, setAmount] = useState(initialData?.amount?.toString() || "");
   
-  // Puxamos 'title' se existir, ou o fallback 'description'
   const [title, setTitle] = useState(initialData?.description || "");
   const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
   const [isPaid, setIsPaid] = useState(initialData?.isPaid ?? true);
@@ -44,14 +40,13 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     if (!amount || !title) return alert("Preencha o valor e o título!");
 
     try {
-      // Montamos o payload respeitando o contrato da Entidade (Domain)
       const payload = {
-        description: title, // Mantemos para não quebrar seu banco caso ainda não tenha a coluna title
+        description: title,
         amount: Number.parseFloat(amount.replace(',', '.')),
         type: type,
         date: new Date(date).toISOString(),
         is_paid: isPaid,
-        currency: 'BRL', // A entidade exige a moeda
+        currency: 'BRL',
       };
 
       if (isEditing && initialData) {
@@ -60,7 +55,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
         await createTransaction(payload);
       }
 
-      onSuccess(); // Sucesso! Avisa a página para fechar a gaveta e recarregar a lista.
+      onSuccess();
 
     } catch (error: unknown) {
       console.error(error);

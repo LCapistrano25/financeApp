@@ -190,7 +190,8 @@ export default function DashboardPage() {
               amount: selectedTransaction.amount,
               description: selectedTransaction.description,
               date: selectedTransaction.date,
-              isPaid: selectedTransaction.isPaid
+              isPaid: selectedTransaction.isPaid,
+              categoryId: selectedTransaction.categoryId
             } : undefined}
             onSuccess={() => {
               setActiveForm(null);

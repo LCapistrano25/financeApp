@@ -4,11 +4,15 @@ import { CreateTransactionDto } from './dto';
 import { CreateTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { IAuthService } from '@/application/ports/iauth.service';
+import { ICategoryRepository } from '@/domain/repositories/ICategoryRepository';
+import { Category } from '@/domain/entities/category/category';
+import { CategoryType } from '@/domain/enum/category-types';
 
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
   let mockRepository: jest.Mocked<ITransactionRepository>;
   let mockAuthService: jest.Mocked<IAuthService>;
+  let mockCategoryRepository: jest.Mocked<ICategoryRepository>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -21,7 +25,10 @@ describe('CreateTransactionUseCase', () => {
       signInWithGoogle: jest.fn(),
       signOut: jest.fn(),
     } as unknown as jest.Mocked<IAuthService>;
-    useCase = new CreateTransactionUseCase(mockRepository, mockAuthService);
+    mockCategoryRepository = {
+      getCategoryById: jest.fn(),
+    } as unknown as jest.Mocked<ICategoryRepository>;
+    useCase = new CreateTransactionUseCase(mockRepository, mockAuthService, mockCategoryRepository);
   });
 
   it('deve lançar erro se o usuário não estiver logado', async () => {
@@ -68,5 +75,69 @@ describe('CreateTransactionUseCase', () => {
     const callArg = mockRepository.createTransaction.mock.calls[0][0];
     expect(callArg.userId).toBe('user-123');
     expect(callArg.amount).toBe(150);
+  });
+
+  it('deve validar categoria quando category_id for informado', async () => {
+    const mockUser = { id: 'user-123' };
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser);
+
+    const payload: CreateTransactionDto = {
+      amount: 10,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-11',
+      is_paid: true,
+      category_id: 'cat-1',
+    };
+
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: mockUser.id,
+        name: 'Mercado',
+        icon: '🛒',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    const mockTransaction = Transaction.create({ ...payload, user_id: mockUser.id });
+    mockRepository.createTransaction.mockResolvedValue(mockTransaction);
+
+    await useCase.execute(payload);
+    expect(mockCategoryRepository.getCategoryById).toHaveBeenCalledWith('cat-1');
+    expect(mockRepository.createTransaction).toHaveBeenCalled();
+  });
+
+  it('deve lançar erro quando a categoria não for compatível com o tipo da transação', async () => {
+    const mockUser = { id: 'user-123' };
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser);
+
+    const payload: CreateTransactionDto = {
+      amount: 10,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-11',
+      is_paid: true,
+      category_id: 'cat-1',
+    };
+
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: mockUser.id,
+        name: 'Salário',
+        icon: '💰',
+        color: '#10b981',
+        type: CategoryType.INCOME,
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    await expect(useCase.execute(payload)).rejects.toThrow(
+      "A categoria selecionada não é compatível com o tipo da transação."
+    );
+    expect(mockRepository.createTransaction).not.toHaveBeenCalled();
   });
 });

@@ -6,6 +6,7 @@ import { BottomSheet } from "@/presentation/components/mobile/bottom-sheet";
 import { CategoryForm } from "@/presentation/components/forms/category-form";
 import { useCategories } from "@/presentation/hooks/category/get-categories/use-get-categories";
 import { useDeleteCategory } from "@/presentation/hooks/category/delete-category/use-delete-category";
+import { CategoryType } from "@/domain/enum/category-types";
 import type { Category } from "@/domain/entities/category/category";
 
 export default function CategoriesPage() {
@@ -89,7 +90,7 @@ export default function CategoriesPage() {
                   </div>
                   <div className="text-left">
                     <div className="font-semibold">{c.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{c.type === "INCOME" ? "Receita" : "Despesa"}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">{c.type === CategoryType.INCOME ? "Receita" : "Despesa"}</div>
                   </div>
                 </div>
                 <span className="text-sm text-slate-400">Ver</span>

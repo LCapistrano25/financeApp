@@ -1,5 +1,6 @@
 import { RepeatFrequency } from "../../enum/repeat-frequency";
 import { TransactionType } from "../../enum/transaction-type";
+import { Amount } from "../../value-objects/amount";
 import { TransactionProps } from "./transactions.props";
 
 export class Transaction {
@@ -32,7 +33,7 @@ export class Transaction {
   
   get id(): string | undefined { return this.props.id; }
   get userId(): string { return this.props.user_id; }
-  get amount(): number { return this.props.amount; }
+  get amount(): number { return Amount.create(this.props.amount).value; }
   get currency(): string { return this.props.currency; }
   get type(): TransactionType { return this.props.type; }
   get date(): string { return this.props.date; }
@@ -66,16 +67,33 @@ export class Transaction {
   }
 
   private validate(): void {
-    if (this.props.amount <= 0) {
-      throw new Error("Transaction amount must be greater than zero.");
+    Amount.create(this.props.amount);
+
+    if (!this.props.user_id?.trim()) {
+    throw new Error("ID do usuário é obrigatório.");
+  }
+
+  if (!this.props.currency?.trim()) {
+    throw new Error("Moeda é obrigatória.");
+  }
+
+  const transactionDate = new Date(this.props.date);
+  if (!this.props.date || Number.isNaN(transactionDate.getTime())) {
+    throw new Error("A data da transação deve ser válida.");
+  }
+
+  if (!Object.values(TransactionType).includes(this.props.type)) {
+    throw new Error("O tipo de transação deve ser válido.");
+  }
+
+  if (this.props.repeat) {
+    if (!this.props.repeat_frequency) {
+      throw new Error("Frequência de repetição é obrigatória quando a repetição está ativada.");
     }
 
-    if (!this.props.currency) {
-      throw new Error("Currency is required.");
+    if (!this.props.repeat_times || this.props.repeat_times <= 0) {
+      throw new Error("O número de repetições deve ser maior que zero quando a repetição está ativada.");
     }
-
-    if (this.props.repeat && !this.props.repeat_frequency) {
-      throw new Error("Repeat frequency is required when repeat is enabled.");
-    }
+  }
   }
 }

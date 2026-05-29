@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Transaction } from "@/domain/entities/transaction";
+import { Transaction } from "@/domain/entities/transaction/transaction";
 import { listTransactionsHandler } from "@/application/queries/list-transactions/list-transactions.handler";
 
 export function useTransactions(monthYear: string) {

@@ -8,7 +8,7 @@ import { BottomSheet } from "@/presentation/components/mobile/bottom-sheet";
 import { TransactionForm } from "@/presentation/components/forms/transaction-form";
 import { useTransactions } from "@/presentation/hooks/use-transactions";
 import { useDeleteTransaction } from "@/presentation/hooks/use-delete-transaction"; // <-- NOVO HOOK IMPORTADO
-import type { Transaction } from "@/domain/entities/transaction";
+import type { Transaction } from "@/domain/entities/transaction/transaction";
 
 function getCurrentMonthYear() {
   const now = new Date();
@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
     // O hook de delete já tem o confirm nativo (ou você pode manter o seu aqui)
     try {
-      const success = await deleteTransaction(selectedTransaction.id);
+      const success = await deleteTransaction(selectedTransaction.id!);
 
       if (success) {
         setIsDetailOpen(false); // Fecha a gaveta

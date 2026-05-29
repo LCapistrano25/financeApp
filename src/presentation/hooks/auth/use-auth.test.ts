@@ -10,6 +10,7 @@ jest.mock('@/infrastructure/repositories/supabase/supabase.client', () => ({
         data: { session: { user: { id: 'user-1' } } },  // Add the session structure
       }),
       signOut: jest.fn().mockResolvedValue({}),  // Ensure signOut returns proper structure
+      signInWithOAuth: jest.fn().mockResolvedValue({}),
       onAuthStateChange: jest.fn((callback) => {
         callback(null, { user: { id: 'user-1' } });
         return { data: { subscription: { unsubscribe: jest.fn() } } };
@@ -64,5 +65,20 @@ describe('useAuth', () => {
 
     expect(supabase.auth.signOut).toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith('/auth/login');
+  });
+
+  it('should call loginWithGoogle correctly', async () => {
+    const { result } = renderHook(() => useAuth());
+
+    await act(async () => {
+      await result.current.loginWithGoogle();
+    });
+
+    expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'google',
+      options: expect.objectContaining({
+        redirectTo: expect.stringContaining('/auth/callback'),
+      }),
+    });
   });
 });

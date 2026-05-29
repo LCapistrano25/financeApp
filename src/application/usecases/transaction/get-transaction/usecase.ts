@@ -6,8 +6,8 @@ import { TransactionSummary } from "@/domain/value-objects/transaction-summary";
 
 export class GetTransactionsUseCase implements IGetTransactionsUseCase {
     constructor(
-        private repository: ITransactionRepository, 
-        private authService: IAuthService
+        private readonly repository: ITransactionRepository, 
+        private readonly authService: IAuthService
     ) {}
 
     async execute(monthYearValue: string): Promise<GetTransactionsResponse> {

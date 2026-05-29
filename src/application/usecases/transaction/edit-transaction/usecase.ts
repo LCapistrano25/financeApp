@@ -6,8 +6,8 @@ import { IAuthService } from "../../../../infrastructure/services/iauth.service"
 
 export class EditTransactionUseCase implements IEditTransactionUseCase {
   constructor(
-    private repository: ITransactionRepository,
-    private authService: IAuthService
+    private readonly repository: ITransactionRepository,
+    private readonly authService: IAuthService
   ) {}
   
   async editTransaction(id: string, input: EditTransactionDto): Promise<Transaction> {

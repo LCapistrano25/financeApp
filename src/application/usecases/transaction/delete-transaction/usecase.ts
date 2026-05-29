@@ -5,8 +5,8 @@ import { IAuthService } from '../../../../infrastructure/services/iauth.service'
 
 export class DeleteTransactionUseCase implements IDeleteTransactionUseCase {
   constructor(
-    private repository: ITransactionRepository,
-    private authService: IAuthService
+    private readonly repository: ITransactionRepository,
+    private readonly authService: IAuthService
   ) {}
   
   async execute(id: string): Promise<void> {

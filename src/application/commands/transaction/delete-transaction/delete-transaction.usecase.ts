@@ -1,6 +1,7 @@
 import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
 import { supabase } from '@/infrastructure/supabase/supabase.client';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
+import { IDeleteTransactionUseCase } from './idelete-transaction.usecase';
 
 
 export class DeleteTransactionUseCase implements IDeleteTransactionUseCase {

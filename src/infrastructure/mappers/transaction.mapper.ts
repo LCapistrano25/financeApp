@@ -6,7 +6,7 @@ export class TransactionMapper {
 
     static toDomain(props: TransactionProps): Transaction {
 
-        return Transaction.get(props);
+        return Transaction.restore(props);
     }
 
     static toPersistence(

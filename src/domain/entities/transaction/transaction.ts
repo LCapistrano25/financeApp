@@ -17,9 +17,9 @@ export class Transaction {
     });
   }
 
-  public static get(props: TransactionProps): Transaction {
+  public static restore(props: TransactionProps): Transaction {
     if (!props.id) {
-      throw new Error("ID is required to get a transaction.");
+      throw new Error("ID is required to restore a transaction.");
     }
     return new Transaction(props);
   }

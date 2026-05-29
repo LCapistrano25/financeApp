@@ -1,9 +1,9 @@
-import { supabase } from '../supabase.client';
-import { TransactionRepository } from './transaction.repository';
+import { supabase } from '@/infrastructure/repositories/supabase/supabase.client';
+import { TransactionRepository } from '@/infrastructure/repositories/supabase/transaction/transaction.repository';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 
 // Criamos um mock universal para simular a sintaxe encadeada do Supabase
-jest.mock('../supabase.client', () => {
+jest.mock('@/infrastructure/repositories/supabase/supabase.client', () => {
     const mockQuery = {
         select: jest.fn().mockReturnThis(),
         insert: jest.fn().mockReturnThis(),

@@ -1,4 +1,4 @@
-import { Account } from "../entities/account/account";
+import { Account } from "@/domain/entities/account/account";
 
 export interface IAccountRepository {
   getAccountById(id: string): Promise<Account | null>;

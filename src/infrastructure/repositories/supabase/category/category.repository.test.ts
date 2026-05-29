@@ -1,9 +1,9 @@
 import { CategoryType } from "@/domain/enum/category-types";
 import { Category } from "@/domain/entities/category/category";
-import { supabase } from "../supabase.client";
-import { CategoryRepository } from "./category.repository";
+import { supabase } from "@/infrastructure/repositories/supabase/supabase.client";
+import { CategoryRepository } from "@/infrastructure/repositories/supabase/category/category.repository";
 
-jest.mock("../supabase.client", () => {
+jest.mock("@/infrastructure/repositories/supabase/supabase.client", () => {
   const mockQuery = {
     select: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),

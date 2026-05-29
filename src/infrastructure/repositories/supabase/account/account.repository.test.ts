@@ -1,8 +1,8 @@
 import { Account } from "@/domain/entities/account/account";
-import { supabase } from "../supabase.client";
-import { AccountRepository } from "./account.repository";
+import { supabase } from "@/infrastructure/repositories/supabase/supabase.client";
+import { AccountRepository } from "@/infrastructure/repositories/supabase/account/account.repository";
 
-jest.mock("../supabase.client", () => {
+jest.mock("@/infrastructure/repositories/supabase/supabase.client", () => {
   const mockQuery = {
     select: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),

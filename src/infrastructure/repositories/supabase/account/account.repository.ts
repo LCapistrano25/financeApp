@@ -1,7 +1,7 @@
 import { Account } from "@/domain/entities/account/account";
 import { IAccountRepository } from "@/domain/repositories/IAccountRepository";
 import { AccountMapper } from "@/infrastructure/mappers/account.mapper";
-import { supabase } from "../supabase.client";
+import { supabase } from "@/infrastructure/repositories/supabase/supabase.client";
 
 export class AccountRepository implements IAccountRepository {
   async getAccountById(id: string): Promise<Account | null> {

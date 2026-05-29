@@ -7,12 +7,15 @@ import { IAuthService } from '@/application/ports/iauth.service';
 import { ICategoryRepository } from '@/domain/repositories/ICategoryRepository';
 import { Category } from '@/domain/entities/category/category';
 import { CategoryType } from '@/domain/enum/category-types';
+import { IAccountRepository } from '@/domain/repositories/IAccountRepository';
+import { Account } from '@/domain/entities/account/account';
 
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
   let mockRepository: jest.Mocked<ITransactionRepository>;
   let mockAuthService: jest.Mocked<IAuthService>;
   let mockCategoryRepository: jest.Mocked<ICategoryRepository>;
+  let mockAccountRepository: jest.Mocked<IAccountRepository>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,7 +31,10 @@ describe('CreateTransactionUseCase', () => {
     mockCategoryRepository = {
       getCategoryById: jest.fn(),
     } as unknown as jest.Mocked<ICategoryRepository>;
-    useCase = new CreateTransactionUseCase(mockRepository, mockAuthService, mockCategoryRepository);
+    mockAccountRepository = {
+      getAccountById: jest.fn(),
+    } as unknown as jest.Mocked<IAccountRepository>;
+    useCase = new CreateTransactionUseCase(mockRepository, mockAuthService, mockCategoryRepository, mockAccountRepository);
   });
 
   it('deve lançar erro se o usuário não estiver logado', async () => {
@@ -108,6 +114,57 @@ describe('CreateTransactionUseCase', () => {
     await useCase.execute(payload);
     expect(mockCategoryRepository.getCategoryById).toHaveBeenCalledWith('cat-1');
     expect(mockRepository.createTransaction).toHaveBeenCalled();
+  });
+
+  it('deve validar conta quando account_id for informado', async () => {
+    const mockUser = { id: 'user-123' };
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser);
+
+    const payload: CreateTransactionDto = {
+      amount: 10,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-11',
+      is_paid: true,
+      account_id: 'acc-1',
+    };
+
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: mockUser.id,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    const mockTransaction = Transaction.create({ ...payload, user_id: mockUser.id });
+    mockRepository.createTransaction.mockResolvedValue(mockTransaction);
+
+    await useCase.execute(payload);
+    expect(mockAccountRepository.getAccountById).toHaveBeenCalledWith('acc-1');
+    expect(mockRepository.createTransaction).toHaveBeenCalled();
+  });
+
+  it('deve lançar erro quando a conta não existir', async () => {
+    const mockUser = { id: 'user-123' };
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser);
+
+    const payload: CreateTransactionDto = {
+      amount: 10,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-11',
+      is_paid: true,
+      account_id: 'acc-1',
+    };
+
+    mockAccountRepository.getAccountById.mockResolvedValue(null);
+
+    await expect(useCase.execute(payload)).rejects.toThrow("Conta não encontrada.");
+    expect(mockRepository.createTransaction).not.toHaveBeenCalled();
   });
 
   it('deve lançar erro quando a categoria não for compatível com o tipo da transação', async () => {

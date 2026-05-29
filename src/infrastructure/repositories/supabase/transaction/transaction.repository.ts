@@ -7,7 +7,7 @@ export class TransactionRepository implements ITransactionRepository {
   async getTransactionById(id: string): Promise<Transaction | null> {
     const { data, error } = await supabase
       .from('transactions')
-      .select('*, category:categories(name)')
+      .select('*, category:categories(name), account:accounts(name)')
       .eq('id', id)
       .single();
 
@@ -26,7 +26,7 @@ export class TransactionRepository implements ITransactionRepository {
   ): Promise<Transaction[]> {
     const { data, error } = await supabase
       .from('transactions')
-      .select('*, category:categories(name)')
+      .select('*, category:categories(name), account:accounts(name)')
       .eq('user_id', userId)
       .gte('date', startDate)
       .lte('date', endDate)

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { TransactionType } from "@/domain/enum/transaction-type";
 import { useCategories } from "@/presentation/hooks/category/get-categories/use-get-categories";
+import { useAccounts } from "@/presentation/hooks/account/get-accounts/use-get-accounts";
 
 import { useCreateTransaction } from "@/presentation/hooks/transaction/create-transaction/use-create-transaction";
 import { useEditTransaction } from "@/presentation/hooks/transaction/edit-transaction/use-edit-transaction";
@@ -16,6 +17,7 @@ type TransactionFormInitialData = {
   readonly date: string;
   readonly isPaid: boolean;
   readonly categoryId?: string;
+  readonly accountId?: string;
 };
 
 type TransactionFormProps = Readonly<{
@@ -34,12 +36,15 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
   const { categories, isLoading: isLoadingCategories } = useCategories();
   const categoriesForType = categories.filter((c) => c.type === type);
 
+  const { accounts, isLoading: isLoadingAccounts } = useAccounts();
+
   const [amount, setAmount] = useState(initialData?.amount?.toString() || "");
   
   const [title, setTitle] = useState(initialData?.description || "");
   const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
   const [isPaid, setIsPaid] = useState(initialData?.isPaid ?? true);
   const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? "");
+  const [accountId, setAccountId] = useState(initialData?.accountId ?? "");
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,6 +59,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
         is_paid: isPaid,
         currency: 'BRL',
         ...(categoryId ? { category_id: categoryId } : {}),
+        ...(accountId ? { account_id: accountId } : {}),
       };
 
       if (isEditing && initialData) {
@@ -159,6 +165,24 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
             {categoriesForType.map((c) => (
               <option key={c.id} value={c.id}>
                 {`${c.icon ?? "🏷️"} ${c.name}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="account" className="text-xs font-bold text-slate-400 ml-1 uppercase">Conta</label>
+          <select
+            id="account"
+            value={accountId}
+            onChange={(e) => setAccountId(e.target.value)}
+            disabled={isLoadingAccounts}
+            className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100"
+          >
+            <option value="">{isLoadingAccounts ? "Carregando..." : "Sem conta"}</option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {`${a.icon ?? "🏦"} ${a.name}`}
               </option>
             ))}
           </select>

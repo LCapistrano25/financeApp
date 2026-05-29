@@ -49,6 +49,14 @@ export class Transaction {
   get repeatTimes(): number | undefined { return this.props.repeat_times; }
   get repeatFrequency(): RepeatFrequency | undefined { return this.props.repeat_frequency; }
   get createdAt(): string | undefined { return this.props.created_at; }
+  get categoryName(): string | undefined {
+    const category = (this.props as unknown as { category?: { name?: string } | null }).category;
+    return category?.name;
+  }
+  get accountName(): string | undefined {
+    const account = (this.props as unknown as { account?: { name?: string } | null }).account;
+    return account?.name;
+  }
 
   public markAsPaid(): void {
     this.props.is_paid = true;

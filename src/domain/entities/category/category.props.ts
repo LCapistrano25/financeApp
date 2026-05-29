@@ -7,5 +7,5 @@ export interface CategoryProps {
   color: string;
   user_id: string;
   type: CategoryType;
-  created_at: string;
+  created_at?: string;
 }

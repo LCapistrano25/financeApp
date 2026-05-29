@@ -1,11 +1,11 @@
 import { supabase } from '../repositories/supabase/supabase.client';
-import { IAuthService } from './iauth.service';
+import { AuthenticatedUser, IAuthService } from '@/application/ports/iauth.service';
 import type { User } from '@supabase/supabase-js';
 
 export class SupabaseAuthService implements IAuthService {
   private currentUser: User | null = null;
 
-  async getCurrentUser(): Promise<User | null> {
+  async getCurrentUser(): Promise<AuthenticatedUser | null> {
     if (this.currentUser) return this.currentUser;
 
     const { data: { session }, error } = await supabase.auth.getSession();
@@ -19,7 +19,7 @@ export class SupabaseAuthService implements IAuthService {
     return this.currentUser;
   }
 
-  async getAuthenticatedUser(): Promise<User> {
+  async getAuthenticatedUser(): Promise<AuthenticatedUser> {
     const user = await this.getCurrentUser();
     if (!user) {
       throw new Error("Você precisa estar logado para realizar esta operação.");

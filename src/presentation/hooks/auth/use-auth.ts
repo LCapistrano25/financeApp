@@ -45,7 +45,7 @@ export function useAuth() {
       // Se houver uma variável de ambiente, usamos ela como base.
       // Caso contrário, usamos o origin atual.
       const envRedirect = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL;
-      const origin = typeof globalThis.window === "undefined" ? '' : globalThis.window.location.origin;
+      const origin = globalThis.window === undefined ? '' : globalThis.window.location.origin;
       
       let baseRedirect = envRedirect || origin;
       

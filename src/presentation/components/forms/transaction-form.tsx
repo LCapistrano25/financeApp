@@ -6,8 +6,8 @@ import { Check, Loader2 } from "lucide-react";
 import type { Transaction } from "@/domain/entities/transaction";
 
 // IMPORTAMOS OS NOSSOS HOOKS DE CASO DE USO
-import { useCreateTransaction } from "@/presentation/hooks/use-create-transaction";
-import { useEditTransaction } from "@/presentation/hooks/use-edit-transaction";
+import { useCreateTransaction } from "@/presentation/hooks/transaction/create-transaction/use-create-transaction";
+import { useEditTransaction } from "@/presentation/hooks/transaction/edit-transaction/use-edit-transaction";
 
 type TransactionFormInitialData = {
   readonly id: Transaction["id"];

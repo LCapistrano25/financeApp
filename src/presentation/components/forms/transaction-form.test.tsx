@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TransactionForm } from './transaction-form';
 // IMPORTAMOS OS NOSSOS HOOKS PARA PODER FAZER O MOCK DELES
-import { useCreateTransaction } from '@/presentation/hooks/use-create-transaction';
-import { useEditTransaction } from '@/presentation/hooks/use-edit-transaction';
+import { useCreateTransaction } from '@/presentation/hooks/transaction/create-transaction/use-create-transaction';
+import { useEditTransaction } from '@/presentation/hooks/transaction/edit-transaction/use-edit-transaction';
 
 // 1. Mockamos os hooks em vez do Supabase
 jest.mock('@/presentation/hooks/use-create-transaction', () => ({

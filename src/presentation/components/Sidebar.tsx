@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { LogOut, Moon, Sun, User as UserIcon, Menu, X } from "lucide-react";
-import { useAuth } from "@/presentation/hooks/use-auth"; 
+import { useAuth } from "@/presentation/hooks/auth/use-auth"; 
 import Image from "next/image";
 import { useTheme } from "next-themes";
 

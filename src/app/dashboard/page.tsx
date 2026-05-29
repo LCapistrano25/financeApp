@@ -6,8 +6,8 @@ import { SummaryCard } from "@/presentation/components/cards/summary-card";
 import { TransactionCard } from "@/presentation/components/cards/transaction-card";
 import { BottomSheet } from "@/presentation/components/mobile/bottom-sheet";
 import { TransactionForm } from "@/presentation/components/forms/transaction-form";
-import { useTransactions } from "@/presentation/hooks/use-transactions";
-import { useDeleteTransaction } from "@/presentation/hooks/use-delete-transaction"; // <-- NOVO HOOK IMPORTADO
+import { useTransactions } from "@/presentation/hooks/transaction/get-transaction/use-get-transactions";
+import { useDeleteTransaction } from "@/presentation/hooks/transaction/delete-transaction/use-delete-transaction"; // <-- NOVO HOOK IMPORTADO
 import type { Transaction } from "@/domain/entities/transaction/transaction";
 
 function getCurrentMonthYear() {

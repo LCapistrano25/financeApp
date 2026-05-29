@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/presentation/hooks/use-auth";
+import { useAuth } from "@/presentation/hooks/auth/use-auth";
 
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">

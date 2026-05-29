@@ -1,5 +1,5 @@
 import { authService } from './supabase-auth.service';
-import { supabase } from '../supabase/supabase.client';
+import { supabase } from '../repositories/supabase/supabase.client';
 
 jest.mock('../supabase/supabase.client', () => ({
   supabase: {

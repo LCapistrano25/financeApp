@@ -1,5 +1,4 @@
 import { Transaction } from "@/domain/entities/transaction/transaction";
-import { TransactionType } from "@/domain/enum/transaction-type";
 import { TransactionProps } from "@/domain/entities/transaction/transactions.props";
 
 export class TransactionMapper {

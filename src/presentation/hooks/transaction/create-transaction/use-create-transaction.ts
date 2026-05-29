@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CreateTransactionDto } from '@/application/usecases/transaction/create-transaction/dto';
-import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
+import { transactionRepository } from '@/infrastructure/repositories/supabase/transaction/transaction.repository';
 import { authService } from '@/infrastructure/services/supabase-auth.service';
 import { CreateTransactionUseCase } from '@/application/usecases/transaction/create-transaction/usecase';
 

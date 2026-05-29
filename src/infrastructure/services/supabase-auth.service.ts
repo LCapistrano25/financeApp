@@ -1,4 +1,4 @@
-import { supabase } from '../supabase/supabase.client';
+import { supabase } from '../repositories/supabase/supabase.client';
 import { IAuthService } from './iauth.service';
 import type { User } from '@supabase/supabase-js';
 

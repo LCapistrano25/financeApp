@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Transaction } from "@/domain/entities/transaction/transaction";
 import { GetTransactionsUseCase } from "@/application/usecases/transaction/get-transaction/usecase";
-import { transactionRepository } from "@/infrastructure/supabase/transaction.repository";
 import { authService } from "@/infrastructure/services/supabase-auth.service";
+import { transactionRepository } from "@/infrastructure/repositories/supabase/transaction/transaction.repository";
 
 export function useTransactions(monthYear: string) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);

@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation'; // <-- 1. IMPORTAMOS O ROUTER DO NE
 import { LoginUseCase } from '@/application/usecases/auth/login/usecase';
 import { LogoutUseCase } from '@/application/usecases/auth/logout/usecase';
 import { authService } from '@/infrastructure/services/supabase-auth.service';
-import { supabase } from '@/infrastructure/supabase/supabase.client';
+import { supabase } from '@/infrastructure/repositories/supabase/supabase.client';
 import type { User } from '@supabase/supabase-js';
 
 export function useAuth() {

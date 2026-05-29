@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useTransactions } from './use-get-transactions';
-import { supabase } from '@/infrastructure/supabase/supabase.client';
+import { supabase } from '@/infrastructure/repositories/supabase/supabase.client';
 import { authService } from '@/infrastructure/services/supabase-auth.service';
 
 jest.mock('@/infrastructure/supabase/supabase.client', () => ({

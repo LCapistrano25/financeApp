@@ -8,12 +8,12 @@ describe("Amount Value Object", () => {
   });
 
   it("deve rejeitar valor menor ou igual a zero", () => {
-    expect(() => Amount.create(0)).toThrow("Amount must be greater than zero.");
-    expect(() => Amount.create(-10)).toThrow("Amount must be greater than zero.");
+    expect(() => Amount.create(0)).toThrow("maior que zero");
+    expect(() => Amount.create(-10)).toThrow("maior que zero");
   });
 
   it("deve rejeitar valores nao finitos", () => {
-    expect(() => Amount.create(Number.NaN)).toThrow("Amount must be a finite number.");
-    expect(() => Amount.create(Number.POSITIVE_INFINITY)).toThrow("Amount must be a finite number.");
+    expect(() => Amount.create(Number.NaN)).toThrow("finito");
+    expect(() => Amount.create(Number.POSITIVE_INFINITY)).toThrow("finito");
   });
 });

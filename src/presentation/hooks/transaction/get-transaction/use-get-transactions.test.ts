@@ -29,9 +29,9 @@ describe('useTransactions', () => {
     const mockLte = jest.fn().mockReturnThis();
     const mockOrder = jest.fn().mockResolvedValue({
       data: [
-        { id: '1', amount: 100, type: 'INCOME', is_paid: true, currency: 'BRL', date: '2023-10-01' },
-        { id: '2', amount: 50, type: 'EXPENSE', is_paid: true, currency: 'BRL', date: '2023-10-02' },
-        { id: '3', amount: 200, type: 'INCOME', is_paid: false, currency: 'BRL', date: '2023-10-03' },
+        { id: '1', user_id: '123', amount: 100, type: 'INCOME', is_paid: true, currency: 'BRL', date: '2023-10-01' },
+        { id: '2', user_id: '123', amount: 50, type: 'EXPENSE', is_paid: true, currency: 'BRL', date: '2023-10-02' },
+        { id: '3', user_id: '123', amount: 200, type: 'INCOME', is_paid: false, currency: 'BRL', date: '2023-10-03' },
       ],
       error: null,
     });

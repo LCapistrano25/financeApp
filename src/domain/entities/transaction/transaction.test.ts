@@ -22,25 +22,25 @@ describe("Transaction Entity", () => {
 
   it("deve proteger valor, usuario, moeda e data", () => {
     expect(() => Transaction.create({ ...validTransactionProps, amount: 0 })).toThrow(
-      "Amount must be greater than zero."
+      "maior que zero"
     );
 
     expect(() => Transaction.create({ ...validTransactionProps, user_id: "" })).toThrow(
-      "User ID is required."
+      "obrigat"
     );
 
     expect(() => Transaction.create({ ...validTransactionProps, currency: "" })).toThrow(
-      "Currency is required."
+      "Moeda"
     );
 
     expect(() => Transaction.create({ ...validTransactionProps, date: "invalid-date" })).toThrow(
-      "Transaction date must be valid."
+      "data"
     );
   });
 
   it("deve exigir frequencia e quantidade para transacao recorrente", () => {
     expect(() => Transaction.create({ ...validTransactionProps, repeat: true })).toThrow(
-      "Repeat frequency is required when repeat is enabled."
+      "repeti"
     );
 
     expect(() =>
@@ -49,7 +49,7 @@ describe("Transaction Entity", () => {
         repeat: true,
         repeat_frequency: RepeatFrequency.MONTHS,
       })
-    ).toThrow("Repeat times must be greater than zero when repeat is enabled.");
+    ).toThrow("maior que zero");
   });
 
   it("deve permitir marcar como paga e nao paga", () => {

@@ -1,37 +1,48 @@
-import { DeleteTransactionUseCase } from './delete-transaction.usecase';
+import { EditTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
+import { EditTransactionDto } from './dto';
 import { IAuthService } from '../../../services/iauth.service';
 
-describe('DeleteTransactionUseCase', () => {
-  let useCase: DeleteTransactionUseCase;
+describe('EditTransactionUseCase', () => {
+  let useCase: EditTransactionUseCase;
   let mockRepository: jest.Mocked<ITransactionRepository>;
   let mockAuthService: jest.Mocked<IAuthService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockRepository = {
-      deleteTransaction: jest.fn(),
+      updateTransaction: jest.fn(),
       getTransactionById: jest.fn(),
     } as any;
     mockAuthService = {
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
     };
-    useCase = new DeleteTransactionUseCase(mockRepository, mockAuthService);
+    useCase = new EditTransactionUseCase(mockRepository, mockAuthService);
   });
 
   it('deve lançar erro se o usuário não estiver logado', async () => {
-    mockAuthService.getAuthenticatedUser.mockRejectedValue(new Error("Você precisa estar logado para deletar uma transação."));
-    await expect(useCase.execute('tx-1')).rejects.toThrow("Você precisa estar logado para deletar uma transação.");
+    mockAuthService.getAuthenticatedUser.mockRejectedValue(new Error("Você precisa estar logado para editar uma transação."));
+    await expect(useCase.editTransaction('tx-1', {
+      amount: 200,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-10'
+    })).rejects.toThrow("Você precisa estar logado para editar uma transação.");
   });
 
   it('deve lançar erro se a transação não existir', async () => {
     mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as any);
     mockRepository.getTransactionById.mockResolvedValue(null);
 
-    await expect(useCase.execute('tx-1')).rejects.toThrow("Transação não encontrada.");
+    await expect(useCase.editTransaction('tx-1', {
+      amount: 200,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-10'
+    })).rejects.toThrow("Transação não encontrada.");
   });
 
   it('deve lançar erro se o usuário não for o dono da transação', async () => {
@@ -48,10 +59,15 @@ describe('DeleteTransactionUseCase', () => {
     });
     mockRepository.getTransactionById.mockResolvedValue(mockTransaction);
 
-    await expect(useCase.execute('tx-1')).rejects.toThrow("Você não tem permissão para deletar esta transação.");
+    await expect(useCase.editTransaction('tx-1', {
+      amount: 200,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-10'
+    })).rejects.toThrow("Você não tem permissão para editar esta transação.");
   });
 
-  it('deve deletar a transação com sucesso', async () => {
+  it('deve atualizar a transação com sucesso', async () => {
     const userId = 'user-123';
     mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: userId } as any);
 
@@ -65,9 +81,15 @@ describe('DeleteTransactionUseCase', () => {
       is_paid: true
     });
     mockRepository.getTransactionById.mockResolvedValue(mockTransaction);
-    mockRepository.deleteTransaction.mockResolvedValue(undefined);
+    mockRepository.updateTransaction.mockImplementation((id, entity) => Promise.resolve(entity));
 
-    await useCase.execute('tx-1');
-    expect(mockRepository.deleteTransaction).toHaveBeenCalledWith('tx-1');
+    const input: EditTransactionDto = { amount: 500, currency: 'BRL', type: TransactionType.EXPENSE, date: '2023-10-10' };
+    const result = await useCase.editTransaction('tx-1', input);
+
+    expect(result.amount).toBe(500);
+    expect(result.currency).toBe('BRL');
+    expect(result.type).toBe(TransactionType.EXPENSE);
+    expect(result.date).toBe('2023-10-10');
+    expect(mockRepository.updateTransaction).toHaveBeenCalledWith('tx-1', expect.any(Transaction));
   });
 });

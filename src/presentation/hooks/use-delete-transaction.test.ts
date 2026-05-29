@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { useDeleteTransaction } from './use-delete-transaction';
-import { DeleteTransactionUseCase } from '@/application/usecases/transaction/delete-transaction/delete-transaction.usecase';
+import { DeleteTransactionUseCase } from '@/application/usecases/transaction/delete-transaction/usecase';
 
-jest.mock('@/application/commands/transaction/delete-transaction/delete-transaction.usecase');
+jest.mock('@/application/usecases/transaction/delete-transaction/usecase');
 
 describe('useDeleteTransaction', () => {
   beforeEach(() => {

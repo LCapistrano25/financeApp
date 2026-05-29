@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { CreateTransactionDto } from '@/application/usecases/transaction/create-transaction/create-transaction.dto';
+import { CreateTransactionDto } from '@/application/usecases/transaction/create-transaction/dto';
 import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
 import { authService } from '@/infrastructure/services/supabase-auth.service';
-import { CreateTransactionUseCase } from '@/application/usecases/transaction/create-transaction/create-transaction.usecase';
+import { CreateTransactionUseCase } from '@/application/usecases/transaction/create-transaction/usecase';
 
 export function useCreateTransaction() {
   const [isLoading, setIsLoading] = useState(false);

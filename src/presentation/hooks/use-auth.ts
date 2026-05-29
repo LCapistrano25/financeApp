@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // <-- 1. IMPORTAMOS O ROUTER DO NEXT
-import { loginWithGoogleHandler } from '@/application/usecases/auth/login-with-google.handler';
-import { logoutHandler } from '@/application/usecases/auth/logout.handler';
+import { LoginUseCase } from '@/application/usecases/auth/login/usecase';
+import { LogoutUseCase } from '@/application/usecases/auth/logout/usecase';
+import { authService } from '@/infrastructure/services/supabase-auth.service';
 import { supabase } from '@/infrastructure/supabase/supabase.client';
 import type { User } from '@supabase/supabase-js';
 
@@ -10,6 +11,9 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const loginUseCase = new LoginUseCase(authService);
+  const logoutUseCase = new LogoutUseCase(authService);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -54,7 +58,7 @@ export function useAuth() {
         ? baseRedirect 
         : `${baseRedirect}/auth/callback`;
 
-      await loginWithGoogleHandler(redirectTo);
+      await loginUseCase.loginWithGoogle(redirectTo);
     } catch (err: unknown) {
       console.error("Error signing in with Google:", err);
       setError("Falha ao conectar com o Google. Tente novamente.");
@@ -65,7 +69,7 @@ export function useAuth() {
   const logout = async () => {
     setIsLoading(true);
     try {
-      await logoutHandler();
+      await logoutUseCase.execute();
       setUser(null);
 
       // 3. AGORA SIM, FORÇAMOS O REDIRECIONAMENTO!

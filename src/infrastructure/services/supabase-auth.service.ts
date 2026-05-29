@@ -27,6 +27,26 @@ export class SupabaseAuthService implements IAuthService {
     return user;
   }
 
+  async signInWithGoogle(redirectTo: string): Promise<void> {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (error) throw new Error(error.message);
+  }
+
+  async signOut(): Promise<void> {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(error.message);
+    this.clearCache();
+  }
+
+  /**
+   * Limpa o cache local do usuário.
+   */
   clearCache(): void {
     this.currentUser = null;
   }

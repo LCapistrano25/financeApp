@@ -1,7 +1,7 @@
 import { TransactionType } from '@/domain/enum/transaction-type';
 import { Transaction } from '@/domain/entities/transaction/transaction';
-import { CreateTransactionDto } from './create-transaction.dto';
-import { CreateTransactionUseCase } from './create-transaction.usecase';
+import { CreateTransactionDto } from './dto';
+import { CreateTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { IAuthService } from '../../../services/iauth.service';
 

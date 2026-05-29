@@ -1,7 +1,7 @@
 import { ITransactionRepository } from "@/domain/repositories/ITransactionRepository";
-import { EditTransactionDto } from "./edit-transaction.dto";
+import { EditTransactionDto } from "./dto";
 import { Transaction } from "@/domain/entities/transaction/transaction";
-import { IEditTransactionUseCase } from "./iedit-transaction";
+import { IEditTransactionUseCase } from "./iusecase";
 import { IAuthService } from "../../../services/iauth.service";
 
 export class EditTransactionUseCase implements IEditTransactionUseCase {

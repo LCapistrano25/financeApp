@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { useCreateTransaction } from './use-create-transaction';
-import { CreateTransactionUseCase } from '@/application/usecases/transaction/create-transaction/create-transaction.usecase';
+import { CreateTransactionUseCase } from '@/application/usecases/transaction/create-transaction/usecase';
 
-jest.mock('@/application/commands/transaction/create-transaction/create-transaction.usecase');
+jest.mock('@/application/usecases/transaction/create-transaction/usecase');
 
 describe('useCreateTransaction', () => {
   const mockInput = { amount: 100 } as any;

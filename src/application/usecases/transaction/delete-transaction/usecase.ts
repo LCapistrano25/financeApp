@@ -1,5 +1,5 @@
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
-import { IDeleteTransactionUseCase } from './idelete-transaction.usecase';
+import { IDeleteTransactionUseCase } from './iusecase';
 import { IAuthService } from '../../../services/iauth.service';
 
 

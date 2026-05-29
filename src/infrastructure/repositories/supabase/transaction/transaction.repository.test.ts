@@ -2,24 +2,7 @@ import { supabase } from '@/infrastructure/repositories/supabase/supabase.client
 import { TransactionRepository } from '@/infrastructure/repositories/supabase/transaction/transaction.repository';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 
-// Criamos um mock universal para simular a sintaxe encadeada do Supabase
-jest.mock('@/infrastructure/repositories/supabase/supabase.client', () => {
-    const mockQuery = {
-        select: jest.fn().mockReturnThis(),
-        insert: jest.fn().mockReturnThis(),
-        update: jest.fn().mockReturnThis(),
-        delete: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        gte: jest.fn().mockReturnThis(),
-        lte: jest.fn().mockReturnThis(),
-        single: jest.fn(),
-    };
-    return {
-        supabase: {
-            from: jest.fn(() => mockQuery),
-        },
-    };
-});
+jest.mock('@/infrastructure/repositories/supabase/supabase.client');
 
 describe('TransactionRepository', () => {
     let repository: TransactionRepository;

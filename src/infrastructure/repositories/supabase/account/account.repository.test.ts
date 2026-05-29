@@ -2,23 +2,7 @@ import { Account } from "@/domain/entities/account/account";
 import { supabase } from "@/infrastructure/repositories/supabase/supabase.client";
 import { AccountRepository } from "@/infrastructure/repositories/supabase/account/account.repository";
 
-jest.mock("@/infrastructure/repositories/supabase/supabase.client", () => {
-  const mockQuery = {
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    order: jest.fn(),
-    single: jest.fn(),
-  };
-
-  return {
-    supabase: {
-      from: jest.fn(() => mockQuery),
-    },
-  };
-});
+jest.mock("@/infrastructure/repositories/supabase/supabase.client");
 
 describe("AccountRepository", () => {
   let repository: AccountRepository;

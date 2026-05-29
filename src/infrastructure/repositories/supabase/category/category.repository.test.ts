@@ -3,23 +3,7 @@ import { Category } from "@/domain/entities/category/category";
 import { supabase } from "@/infrastructure/repositories/supabase/supabase.client";
 import { CategoryRepository } from "@/infrastructure/repositories/supabase/category/category.repository";
 
-jest.mock("@/infrastructure/repositories/supabase/supabase.client", () => {
-  const mockQuery = {
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    order: jest.fn(),
-    single: jest.fn(),
-  };
-
-  return {
-    supabase: {
-      from: jest.fn(() => mockQuery),
-    },
-  };
-});
+jest.mock("@/infrastructure/repositories/supabase/supabase.client");
 
 describe("CategoryRepository", () => {
   let repository: CategoryRepository;

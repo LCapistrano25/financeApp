@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
-import { TransactionType } from "@/domain/enum/transaction-type";
+import { useCategories } from "@/presentation/hooks/category/get-categories/use-get-categories";
+import { useAccounts } from "@/presentation/hooks/account/get-accounts/use-get-accounts";
 
 import { useCreateTransaction } from "@/presentation/hooks/transaction/create-transaction/use-create-transaction";
 import { useEditTransaction } from "@/presentation/hooks/transaction/edit-transaction/use-edit-transaction";
@@ -14,10 +15,12 @@ type TransactionFormInitialData = {
   readonly description?: string;
   readonly date: string;
   readonly isPaid: boolean;
+  readonly categoryId?: string;
+  readonly accountId?: string;
 };
 
 type TransactionFormProps = Readonly<{
-  type: TransactionType;
+  type: "INCOME" | "EXPENSE";
   initialData?: TransactionFormInitialData;
   onSuccess: () => void;
 }>;
@@ -29,15 +32,24 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
   const { editTransaction, isLoading: isUpdating } = useEditTransaction();
   const isSubmitting = isCreating || isUpdating;
 
+  const { categories, isLoading: isLoadingCategories } = useCategories();
+  const categoriesForType = categories.filter((c) => String(c.type) === type);
+
+  const { accounts, isLoading: isLoadingAccounts } = useAccounts();
+
   const [amount, setAmount] = useState(initialData?.amount?.toString() || "");
   
   const [title, setTitle] = useState(initialData?.description || "");
   const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
   const [isPaid, setIsPaid] = useState(initialData?.isPaid ?? true);
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? "");
+  const [accountId, setAccountId] = useState(initialData?.accountId ?? "");
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
+    if (!categoryId) return alert("Selecione uma categoria.");
+    if (!accountId) return alert("Selecione uma conta.");
 
     try {
       const payload = {
@@ -47,6 +59,8 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
         date: new Date(date).toISOString(),
         is_paid: isPaid,
         currency: 'BRL',
+        category_id: categoryId,
+        account_id: accountId,
       };
 
       if (isEditing && initialData) {
@@ -64,7 +78,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     }
   };
 
-  const transactionTypeName = type === TransactionType.INCOME ? "Receita" : "Despesa";
+  const transactionTypeName = type === "INCOME" ? "Receita" : "Despesa";
 
   let submitButtonContent;
   if (isSubmitting) {
@@ -75,7 +89,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     submitButtonContent = `Confirmar ${transactionTypeName}`;
   }
 
-  const typeClasses = type === TransactionType.INCOME 
+  const typeClasses = type === "INCOME" 
     ? "bg-emerald-500 shadow-emerald-500/20" 
     : "bg-red-500 shadow-red-500/20";
 
@@ -137,6 +151,56 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
               </div>
             </button>
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="category" className="text-xs font-bold text-slate-400 ml-1 uppercase">Categoria</label>
+          <select
+            id="category"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            disabled={isLoadingCategories || categoriesForType.length === 0}
+            className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100"
+            required
+          >
+            <option value="" disabled>
+              {isLoadingCategories
+                ? "Carregando..."
+                : categoriesForType.length === 0
+                  ? "Crie uma categoria primeiro"
+                  : "Selecione uma categoria"}
+            </option>
+            {categoriesForType.map((c) => (
+              <option key={c.id} value={c.id}>
+                {`${c.icon ?? "🏷️"} ${c.name}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="account" className="text-xs font-bold text-slate-400 ml-1 uppercase">Conta</label>
+          <select
+            id="account"
+            value={accountId}
+            onChange={(e) => setAccountId(e.target.value)}
+            disabled={isLoadingAccounts || accounts.length === 0}
+            className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100"
+            required
+          >
+            <option value="" disabled>
+              {isLoadingAccounts
+                ? "Carregando..."
+                : accounts.length === 0
+                  ? "Crie uma conta primeiro"
+                  : "Selecione uma conta"}
+            </option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {`${a.icon ?? "🏦"} ${a.name}`}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

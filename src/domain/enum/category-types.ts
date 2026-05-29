@@ -1,4 +1,1 @@
-export enum CategoryType {
-  EXPENSE = 'EXPENSE',
-  INCOME = 'INCOME',
-}
+export { TransactionType as CategoryType } from "./transaction-type";

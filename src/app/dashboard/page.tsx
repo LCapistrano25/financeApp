@@ -8,7 +8,6 @@ import { BottomSheet } from "@/presentation/components/mobile/bottom-sheet";
 import { TransactionForm } from "@/presentation/components/forms/transaction-form";
 import { useTransactions } from "@/presentation/hooks/transaction/get-transaction/use-get-transactions";
 import { useDeleteTransaction } from "@/presentation/hooks/transaction/delete-transaction/use-delete-transaction"; // <-- NOVO HOOK IMPORTADO
-import { TransactionType } from "@/domain/enum/transaction-type";
 import type { Transaction } from "@/domain/entities/transaction/transaction";
 
 function getCurrentMonthYear() {
@@ -27,28 +26,25 @@ export default function DashboardPage() {
   // 2. Hook de exclusão (Limpo e isolado)
   const { deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
 
-  type TransactionWithCategory = Transaction & { category?: { name: string } | null };
-
   // 3. Estados de Controle das Gavetas
-  const [activeForm, setActiveForm] = useState<TransactionType | null>(null);
+  const [activeForm, setActiveForm] = useState<"INCOME" | "EXPENSE" | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithCategory | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Separando rendas e contas
-  const typedTransactions = transactions as TransactionWithCategory[];
-  const incomes = typedTransactions.filter((t) => t.type === TransactionType.INCOME);
-  const expenses = typedTransactions.filter((t) => t.type === TransactionType.EXPENSE);
+  const incomes = transactions.filter((t) => t.isIncome());
+  const expenses = transactions.filter((t) => t.isExpense());
 
   // --- FUNÇÕES DE AÇÃO ---
 
-  const handleTransactionClick = (transaction: TransactionWithCategory) => {
+  const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsDetailOpen(true);
   };
 
   const handleOpenEdit = () => {
     if (!selectedTransaction) return;
-    setActiveForm(selectedTransaction.type);
+    setActiveForm(selectedTransaction.isIncome() ? "INCOME" : "EXPENSE");
     setIsDetailOpen(false);
   }
 
@@ -69,12 +65,18 @@ export default function DashboardPage() {
     }
   };
 
+  const getTransactionSubtitle = (transaction: Transaction) => {
+    const categoryLabel = transaction.categoryName ?? "Sem categoria";
+    const accountLabel = transaction.accountName;
+    return accountLabel ? `${categoryLabel} • ${accountLabel}` : categoryLabel;
+  };
+
   let formTitle = "Nova Transação";
   if (selectedTransaction) {
     formTitle = "Editar Transação";
-  } else if (activeForm === TransactionType.INCOME) {
+  } else if (activeForm === "INCOME") {
     formTitle = "Nova Receita";
-  } else if (activeForm === TransactionType.EXPENSE) {
+  } else if (activeForm === "EXPENSE") {
     formTitle = "Nova Despesa";
   }
 
@@ -123,13 +125,13 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-2 gap-3 mb-8">
               <button
-                onClick={() => { setActiveForm(TransactionType.INCOME); setSelectedTransaction(null); }}
+                onClick={() => { setActiveForm("INCOME"); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm font-bold text-xl"
               >
                 <Plus className="w-6 h-6" />
               </button>
               <button
-                onClick={() => { setActiveForm(TransactionType.EXPENSE); setSelectedTransaction(null); }}
+                onClick={() => { setActiveForm("EXPENSE"); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm font-bold text-xl"
               >
                 <Minus className="w-6 h-6" />
@@ -144,7 +146,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.description || "Renda"}
-                      category={item.category?.name || "Sem categoria"}
+                      category={getTransactionSubtitle(item)}
                       amount={item.amount}
                       type="income"
                       onClick={() => handleTransactionClick(item)}
@@ -162,7 +164,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.description || "Conta"}
-                      category={item.category?.name || "Sem categoria"}
+                      category={getTransactionSubtitle(item)}
                       amount={item.amount}
                       type="expense"
                       onClick={() => handleTransactionClick(item)}
@@ -190,7 +192,9 @@ export default function DashboardPage() {
               amount: selectedTransaction.amount,
               description: selectedTransaction.description,
               date: selectedTransaction.date,
-              isPaid: selectedTransaction.isPaid
+              isPaid: selectedTransaction.isPaid,
+              categoryId: selectedTransaction.categoryId,
+              accountId: selectedTransaction.accountId
             } : undefined}
             onSuccess={() => {
               setActiveForm(null);

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { LogOut, Moon, Sun, User as UserIcon, Menu, X } from "lucide-react";
+import { LogOut, Moon, Sun, User as UserIcon, Menu, X, LayoutDashboard, Tags, Wallet } from "lucide-react";
 import { useAuth } from "@/presentation/hooks/auth/use-auth"; 
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 
 export function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -59,6 +60,33 @@ export function Sidebar() {
 
                 {/* --- NAV LINKS CORRIGIDO --- */}
                 <nav className="flex-1 px-4 py-2 space-y-1">
+                    <Link
+                        href="/dashboard"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                    >
+                        <LayoutDashboard size={22} className="group-hover:scale-110 transition-transform text-emerald-500" />
+                        <span className="font-medium">Dashboard</span>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/categories"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                    >
+                        <Tags size={22} className="group-hover:scale-110 transition-transform text-slate-500 dark:text-slate-300" />
+                        <span className="font-medium">Categorias</span>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/accounts"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                    >
+                        <Wallet size={22} className="group-hover:scale-110 transition-transform text-slate-500 dark:text-slate-300" />
+                        <span className="font-medium">Contas</span>
+                    </Link>
+
                     {/* Botão Único de Alternar Tema */}
                     <button
                         onClick={() => {

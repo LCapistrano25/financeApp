@@ -18,6 +18,11 @@ export class Category{
     return new Category(props);
   }
 
+  public update(props: Partial<CategoryProps>): void {
+    Object.assign(this.props, props);
+    this.validate();
+  }
+
   get id(): string | undefined { return this.props.id; }
   get userId(): string { return this.props.user_id; }
   get name(): string { return this.props.name; }

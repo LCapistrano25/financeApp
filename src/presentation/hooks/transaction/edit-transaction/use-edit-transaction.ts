@@ -3,12 +3,14 @@ import { EditTransactionUseCase } from '@/application/usecases/transaction/edit-
 import { transactionRepository } from '@/infrastructure/repositories/supabase/transaction/transaction.repository';
 import { authService } from '@/infrastructure/services/supabase-auth.service';
 import { EditTransactionDto } from '@/application/usecases/transaction/edit-transaction/dto';
+import { categoryRepository } from '@/infrastructure/repositories/supabase/category/category.repository';
+import { accountRepository } from '@/infrastructure/repositories/supabase/account/account.repository';
 
 export function useEditTransaction() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const editTransactionUseCase = new EditTransactionUseCase(transactionRepository, authService);
+  const editTransactionUseCase = new EditTransactionUseCase(transactionRepository, authService, categoryRepository, accountRepository);
   
   const editTransaction = async (id: string, data: EditTransactionDto) => {
     setIsLoading(true);

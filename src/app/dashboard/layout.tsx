@@ -13,7 +13,7 @@ export default function DashboardLayout({
             
             {/* 2. Trocamos div por main por semântica */}
             {/* 3. Adicionamos pt-16 para não encavalar com o header fixo da Sidebar */}
-            <main className="flex-1 flex flex-col overflow-y-auto pt-16 lg:pt-0">
+            <main className="flex-1 flex flex-col overflow-y-auto pt-20">
                 {children}
             </main>
         </div>

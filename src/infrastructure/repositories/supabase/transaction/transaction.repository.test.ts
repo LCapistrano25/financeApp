@@ -51,7 +51,7 @@ describe('TransactionRepository', () => {
     });
 
     it('deve atualizar uma transação com sucesso', async () => {
-        const mockData = { id: 'tx-123', amount: 50, currency: 'BRL', type: 'EXPENSE', date: '2023-10-10', is_paid: true };
+        const mockData = { id: 'tx-123', user_id: 'user-1', amount: 50, currency: 'BRL', type: 'EXPENSE', date: '2023-10-10', is_paid: true };
         mockSupabaseQuery.single.mockResolvedValueOnce({ data: mockData, error: null });
 
         // Simulamos uma entidade real

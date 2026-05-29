@@ -1,6 +1,6 @@
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { IDeleteTransactionUseCase } from './iusecase';
-import { IAuthService } from '../../../../infrastructure/services/iauth.service';
+import { IAuthService } from '@/application/ports/iauth.service';
 
 
 export class DeleteTransactionUseCase implements IDeleteTransactionUseCase {

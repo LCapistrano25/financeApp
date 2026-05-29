@@ -3,9 +3,7 @@ import { Transaction } from '@/domain/entities/transaction/transaction';
 import { CreateTransactionDto } from './dto';
 import { CreateTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
-import { IAuthService } from '@/infrastructure/services/iauth.service';
-
-import type { User } from '@supabase/supabase-js';
+import { IAuthService } from '@/application/ports/iauth.service';
 
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
@@ -27,7 +25,6 @@ describe('CreateTransactionUseCase', () => {
   });
 
   it('deve lançar erro se o usuário não estiver logado', async () => {
-    // Simula usuário deslogado
     mockAuthService.getAuthenticatedUser.mockRejectedValue(new Error("Você precisa estar logado para criar uma transação."));
 
     const payload: CreateTransactionDto = {
@@ -46,9 +43,8 @@ describe('CreateTransactionUseCase', () => {
   });
 
   it('deve criar uma transação com sucesso quando o usuário estiver logado', async () => {
-    // Simula usuário logado
     const mockUser = { id: 'user-123' };
-    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser);
 
     const payload: CreateTransactionDto = {
       amount: 150,
@@ -59,7 +55,6 @@ describe('CreateTransactionUseCase', () => {
       description: 'Teste de criação'
     };
 
-    // Criamos uma instância fake da entidade para o retorno do mock
     const mockTransaction = Transaction.create({ ...payload, user_id: 'user-123' });
     mockRepository.createTransaction.mockResolvedValue(mockTransaction);
 
@@ -70,7 +65,6 @@ describe('CreateTransactionUseCase', () => {
       expect.any(Transaction)
     );
     
-    // Verifica se a entidade passada para o repositório tem os dados corretos
     const callArg = mockRepository.createTransaction.mock.calls[0][0];
     expect(callArg.userId).toBe('user-123');
     expect(callArg.amount).toBe(150);

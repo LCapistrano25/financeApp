@@ -1,9 +1,8 @@
 import { GetTransactionsUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
-import { IAuthService } from '@/infrastructure/services/iauth.service';
+import { IAuthService } from '@/application/ports/iauth.service';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
-import type { User } from '@supabase/supabase-js';
 
 describe('GetTransactionsUseCase', () => {
   let useCase: GetTransactionsUseCase;
@@ -26,7 +25,7 @@ describe('GetTransactionsUseCase', () => {
   });
 
   it('deve retornar transações e sumário corretamente', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' });
 
     const mockTransactions = [
       { amount: 1000, type: TransactionType.INCOME, isPaid: true },

@@ -24,7 +24,7 @@ export class Category{
   get icon(): string { return this.props.icon; }
   get color(): string { return this.props.color; }
   get type(): CategoryType { return this.props.type; }
-  get createdAt(): string { return this.props.created_at; }
+  get createdAt(): string | undefined { return this.props.created_at; }
 
   public validate(): void {
     if (!this.props.name) {
@@ -33,6 +33,10 @@ export class Category{
 
     if (!this.props.user_id) {
       throw new Error("User ID is required.");
+    }
+
+    if (!Object.values(CategoryType).includes(this.props.type)) {
+      throw new Error("Category type must be valid.");
     }
 
   }

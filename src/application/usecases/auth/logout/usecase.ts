@@ -1,4 +1,4 @@
-import { IAuthService } from "@/infrastructure/services/iauth.service";
+import { IAuthService } from "@/application/ports/iauth.service";
 import { ILogoutUseCase } from "./iusecase";
 
 export class LogoutUseCase implements ILogoutUseCase {

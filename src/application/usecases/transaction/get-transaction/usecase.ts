@@ -1,6 +1,6 @@
 import IGetTransactionsUseCase, { GetTransactionsResponse } from "./iusecase";
 import { ITransactionRepository } from "@/domain/repositories/ITransactionRepository";
-import { IAuthService } from "@/infrastructure/services/iauth.service";
+import { IAuthService } from "@/application/ports/iauth.service";
 import { MonthYear } from "@/domain/value-objects/month-year";
 import { TransactionSummary } from "@/domain/value-objects/transaction-summary";
 

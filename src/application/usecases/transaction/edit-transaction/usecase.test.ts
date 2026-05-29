@@ -3,8 +3,7 @@ import { ITransactionRepository } from '@/domain/repositories/ITransactionReposi
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
 import { EditTransactionDto } from './dto';
-import { IAuthService } from '@/infrastructure/services/iauth.service';
-import type { User } from '@supabase/supabase-js';
+import { IAuthService } from '@/application/ports/iauth.service';
 
 describe('EditTransactionUseCase', () => {
   let useCase: EditTransactionUseCase;    
@@ -37,7 +36,7 @@ describe('EditTransactionUseCase', () => {
   });
 
   it('deve lançar erro se a transação não existir', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' });
     mockRepository.getTransactionById.mockResolvedValue(null);
 
     await expect(useCase.editTransaction('tx-1', {
@@ -49,7 +48,7 @@ describe('EditTransactionUseCase', () => {
   });
 
   it('deve lançar erro se o usuário não for o dono da transação', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' });
 
     const mockTransaction = Transaction.restore({
       id: 'tx-1',
@@ -72,7 +71,7 @@ describe('EditTransactionUseCase', () => {
 
   it('deve atualizar a transação com sucesso', async () => {
     const userId = 'user-123';
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: userId } as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: userId });
 
     const mockTransaction = Transaction.restore({
       id: 'tx-1',

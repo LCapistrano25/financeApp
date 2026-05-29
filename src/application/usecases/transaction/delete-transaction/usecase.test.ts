@@ -2,8 +2,7 @@ import { DeleteTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
-import { IAuthService } from '@/infrastructure/services/iauth.service';
-import type { User } from '@supabase/supabase-js';
+import { IAuthService } from '@/application/ports/iauth.service';
 
 describe('DeleteTransactionUseCase', () => {
   let useCase: DeleteTransactionUseCase;
@@ -31,14 +30,14 @@ describe('DeleteTransactionUseCase', () => {
   });
 
   it('deve lançar erro se a transação não existir', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' });
     mockRepository.getTransactionById.mockResolvedValue(null);
 
     await expect(useCase.execute('tx-1')).rejects.toThrow("Transação não encontrada.");
   });
 
   it('deve lançar erro se o usuário não for o dono da transação', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' });
 
     const mockTransaction = Transaction.restore({
       id: 'tx-1',
@@ -56,7 +55,7 @@ describe('DeleteTransactionUseCase', () => {
 
   it('deve deletar a transação com sucesso', async () => {
     const userId = 'user-123';
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: userId } as unknown as User);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: userId });
 
     const mockTransaction = Transaction.restore({
       id: 'tx-1',

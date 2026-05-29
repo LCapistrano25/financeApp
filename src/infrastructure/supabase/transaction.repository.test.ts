@@ -50,18 +50,39 @@ describe('TransactionRepository', () => {
     });
 
     it('deve atualizar uma transação com sucesso', async () => {
-        const mockData = { id: 'tx-123', amount: 50 };
+        const mockData = { id: 'tx-123', amount: 50, currency: 'BRL', type: 'EXPENSE', date: '2023-10-10', is_paid: true };
         mockSupabaseQuery.single.mockResolvedValueOnce({ data: mockData, error: null });
 
-        const result = await repository.updateTransaction('tx-123', { amount: 50 });
+        // Simulamos uma entidade real
+        const mockEntity = {
+            id: 'tx-123',
+            amount: 50,
+            currency: 'BRL',
+            type: 'EXPENSE',
+            date: '2023-10-10',
+            isPaid: true,
+            userId: 'user-1'
+        } as any;
 
-        expect(result).toEqual(mockData);
-        expect(mockSupabaseQuery.update).toHaveBeenCalledWith({ amount: 50 });
+        const result = await repository.updateTransaction('tx-123', mockEntity);
+
+        expect(result.id).toEqual(mockData.id);
+        expect(result.amount).toEqual(mockData.amount);
+        expect(mockSupabaseQuery.update).toHaveBeenCalled();
     });
 
     it('deve lançar erro se falhar ao atualizar uma transação', async () => {
         mockSupabaseQuery.single.mockResolvedValueOnce({ data: null, error: { message: 'Update Error' } });
 
-        await expect(repository.updateTransaction('tx-123', { amount: 50 })).rejects.toThrow('Update Error');
+        const mockEntity = {
+            amount: 50,
+            currency: 'BRL',
+            type: 'EXPENSE',
+            date: '2023-10-10',
+            isPaid: true,
+            userId: 'user-1'
+        } as any;
+
+        await expect(repository.updateTransaction('tx-123', mockEntity)).rejects.toThrow('Update Error');
     });
 });

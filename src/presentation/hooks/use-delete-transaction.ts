@@ -1,11 +1,12 @@
 import { DeleteTransactionUseCase } from '@/application/commands/transaction/delete-transaction/delete-transaction.usecase';
 import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
+import { authService } from '@/infrastructure/services/supabase-auth.service';
 import { useState } from 'react';
 
 export function useDeleteTransaction() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const deleteTransactionUseCase = new DeleteTransactionUseCase(transactionRepository);
+  const deleteTransactionUseCase = new DeleteTransactionUseCase(transactionRepository, authService);
   
   const deleteTransaction = async (id: string) => {
     // Alerta de segurança nativo do navegador (opcional, você pode usar um Modal na UI se preferir)

@@ -1,6 +1,6 @@
 import { listTransactionsHandler } from './list-transactions.handler';
 import { transactionRepository } from '../../../infrastructure/supabase/transaction.repository';
-import { supabase } from '../../../infrastructure/supabase/supabase.client';
+import { authService } from '../../../infrastructure/services/supabase-auth.service';
 
 jest.mock('../../../infrastructure/supabase/transaction.repository', () => ({
   transactionRepository: {
@@ -8,11 +8,9 @@ jest.mock('../../../infrastructure/supabase/transaction.repository', () => ({
   },
 }));
 
-jest.mock('../../../infrastructure/supabase/supabase.client', () => ({
-  supabase: {
-    auth: {
-      getSession: jest.fn(),
-    },
+jest.mock('../../../infrastructure/services/supabase-auth.service', () => ({
+  authService: {
+    getAuthenticatedUser: jest.fn(),
   },
 }));
 
@@ -22,28 +20,23 @@ describe('listTransactionsHandler', () => {
   });
 
   it('deve lançar erro se o usuário não estiver logado', async () => {
-    (supabase.auth.getSession as jest.Mock).mockResolvedValue({ data: { session: null } });
+    (authService.getAuthenticatedUser as jest.Mock).mockRejectedValue(new Error("Usuário não autenticado"));
     await expect(listTransactionsHandler('2026-05')).rejects.toThrow("Usuário não autenticado");
   });
 
   it('deve retornar transações e calcular totais corretamente', async () => {
-    (supabase.auth.getSession as jest.Mock).mockResolvedValue({
-      data: { session: { user: { id: 'user-123' } } }
-    });
+    (authService.getAuthenticatedUser as jest.Mock).mockResolvedValue({ id: 'user-123' });
 
     const mockTransactions = [
-      { type: 'INCOME', amount: 1000, is_paid: true },
-      { type: 'INCOME', amount: 500, is_paid: false },
-      { type: 'EXPENSE', amount: 300, is_paid: true },
+      { type: 'INCOME', amount: 1000, isPaid: true },
+      { type: 'INCOME', amount: 500, isPaid: false },
+      { type: 'EXPENSE', amount: 300, isPaid: true },
     ];
 
     (transactionRepository.getTransactionsByDateRange as jest.Mock).mockResolvedValue(mockTransactions);
 
     const result = await listTransactionsHandler('2026-05');
 
-    // FIX: Ajustamos as strings esperadas para refletir o parseamento UTC correto da sua máquina
-    // FIX: Usamos expect.any(String) para que o teste não quebre dependendo do fuso 
-    // horário da máquina (Local vs Servidor do GitHub Actions)
     expect(transactionRepository.getTransactionsByDateRange).toHaveBeenCalledWith(
       'user-123',
       expect.any(String), 

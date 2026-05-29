@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { EditTransactionUseCase } from '@/application/commands/transaction/edit-transaction/edit-transaction.usecase';
 import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
+import { authService } from '@/infrastructure/services/supabase-auth.service';
 import { EditTransactionDto } from '@/application/commands/transaction/edit-transaction/edit-transaction.dto';
 
 export function useEditTransaction() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const editTransactionUseCase = new EditTransactionUseCase(transactionRepository);
+  const editTransactionUseCase = new EditTransactionUseCase(transactionRepository, authService);
   
   const editTransaction = async (id: string, data: EditTransactionDto) => {
     setIsLoading(true);

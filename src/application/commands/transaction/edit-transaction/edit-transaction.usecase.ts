@@ -1,21 +1,17 @@
 import { ITransactionRepository } from "@/domain/repositories/ITransactionRepository";
-import { supabase } from "@/infrastructure/supabase/supabase.client";
 import { EditTransactionDto } from "./edit-transaction.dto";
 import { Transaction } from "@/domain/entities/transaction/transaction";
 import { IEditTransactionUseCase } from "./iedit-transaction";
+import { IAuthService } from "../../../services/iauth.service";
 
 export class EditTransactionUseCase implements IEditTransactionUseCase {
-  private repository: ITransactionRepository;
-   
-  constructor(repository: ITransactionRepository) {
-       this.repository = repository;
-  }
+  constructor(
+    private repository: ITransactionRepository,
+    private authService: IAuthService
+  ) {}
   
   async editTransaction(id: string, input: EditTransactionDto): Promise<Transaction> {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("Você precisa estar logado para editar uma transação.");
-      }
+      const user = await this.authService.getAuthenticatedUser();
     
       // 2. Busca a transação original
       const transaction = await this.repository.getTransactionById(id);
@@ -24,7 +20,7 @@ export class EditTransactionUseCase implements IEditTransactionUseCase {
       }
     
       // 3. Verifica se a transação pertence ao usuário
-      if (transaction.userId !== session.user.id) {
+      if (transaction.userId !== user.id) {
         throw new Error("Você não tem permissão para editar esta transação.");
       }
     

@@ -1,45 +1,30 @@
-import { supabase } from '@/infrastructure/supabase/supabase.client';
-import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
 import { TransactionType } from '@/domain/enum/transaction-type';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { CreateTransactionDto } from './create-transaction.dto';
 import { CreateTransactionUseCase } from './create-transaction.usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
-
-// 1. Fazemos o mock das dependências externas (banco de dados)
-jest.mock('@/infrastructure/supabase/transaction.repository', () => ({
-  transactionRepository: {
-    createTransaction: jest.fn(),
-  },
-}));
-
-jest.mock('@/infrastructure/supabase/supabase.client', () => ({
-  supabase: {
-    auth: {
-      getSession: jest.fn(),
-    },
-  },
-}));
+import { IAuthService } from '../../../services/iauth.service';
 
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
   let mockRepository: jest.Mocked<ITransactionRepository>;
+  let mockAuthService: jest.Mocked<IAuthService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockRepository = {
       createTransaction: jest.fn(),
-      getTransactionById: jest.fn(),
-      getTransactionsByDateRange: jest.fn(),
-      updateTransaction: jest.fn(),
-      deleteTransaction: jest.fn(),
     } as any;
-    useCase = new CreateTransactionUseCase(mockRepository);
+    mockAuthService = {
+      getAuthenticatedUser: jest.fn(),
+      getCurrentUser: jest.fn(),
+    };
+    useCase = new CreateTransactionUseCase(mockRepository, mockAuthService);
   });
 
   it('deve lançar erro se o usuário não estiver logado', async () => {
     // Simula usuário deslogado
-    (supabase.auth.getSession as jest.Mock).mockResolvedValue({ data: { session: null } });
+    mockAuthService.getAuthenticatedUser.mockRejectedValue(new Error("Você precisa estar logado para criar uma transação."));
 
     const payload: CreateTransactionDto = {
       amount: 100,
@@ -58,8 +43,8 @@ describe('CreateTransactionUseCase', () => {
 
   it('deve criar uma transação com sucesso quando o usuário estiver logado', async () => {
     // Simula usuário logado
-    const mockSession = { user: { id: 'user-123' } };
-    (supabase.auth.getSession as jest.Mock).mockResolvedValue({ data: { session: mockSession } });
+    const mockUser = { id: 'user-123' };
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser as any);
 
     const payload: CreateTransactionDto = {
       amount: 150,

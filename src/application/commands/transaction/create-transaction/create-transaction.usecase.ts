@@ -1,26 +1,21 @@
-import { transactionRepository } from '../../../../infrastructure/supabase/transaction.repository';
-import { supabase } from '../../../../infrastructure/supabase/supabase.client';
 import { Transaction } from '../../../../domain/entities/transaction/transaction';
 import { CreateTransactionDto } from './create-transaction.dto';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { ICreateTransactionUseCase } from './icreate-transaction';
+import { IAuthService } from '../../../services/iauth.service';
 
 export class CreateTransactionUseCase implements ICreateTransactionUseCase {
-  private repository: ITransactionRepository;
-  
-  constructor(repository: ITransactionRepository) {
-      this.repository = repository;
-  }
+  constructor(
+    private repository: ITransactionRepository,
+    private authService: IAuthService
+  ) {}
 
   async execute(input: CreateTransactionDto): Promise<Transaction> {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error("Você precisa estar logado para criar uma transação.");
-    }
+    const user = await this.authService.getAuthenticatedUser();
 
     const transaction = Transaction.create({
       ...input,
-      user_id: session.user.id,
+      user_id: user.id,
     });
 
     const newTransaction = await this.repository.createTransaction(transaction);

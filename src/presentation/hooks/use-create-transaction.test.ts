@@ -1,16 +1,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { useCreateTransaction } from './use-create-transaction';
-// Importamos o tipo correto do input para o mock
-import { createTransactionHandler, CreateTransactionInput } from '@/application/commands/transaction/create-transaction/create-transaction.handler';
+import { CreateTransactionUseCase } from '@/application/commands/transaction/create-transaction/create-transaction.usecase';
 
-jest.mock('@/application/commands/transaction/create-transaction/create-transaction.handler');
+jest.mock('@/application/commands/transaction/create-transaction/create-transaction.usecase');
 
 describe('useCreateTransaction', () => {
-  // Substituímos o "as any" por "as unknown as Type"
-  const mockInput = { amount: 100 } as unknown as CreateTransactionInput;
+  const mockInput = { amount: 100 } as any;
 
   it('deve criar uma transação e gerenciar os estados de loading e sucesso', async () => {
-    (createTransactionHandler as jest.Mock).mockResolvedValue({ id: '1' });
+    const mockExecute = jest.fn().mockResolvedValue({ id: '1' });
+    (CreateTransactionUseCase as jest.Mock).mockImplementation(() => ({
+      execute: mockExecute,
+    }));
     
     const { result } = renderHook(() => useCreateTransaction());
 
@@ -28,7 +29,10 @@ describe('useCreateTransaction', () => {
   });
 
   it('deve lidar com erros corretamente', async () => {
-    (createTransactionHandler as jest.Mock).mockRejectedValue(new Error('Erro Fatal'));
+    const mockExecute = jest.fn().mockRejectedValue(new Error('Erro Fatal'));
+    (CreateTransactionUseCase as jest.Mock).mockImplementation(() => ({
+      execute: mockExecute,
+    }));
     
     const { result } = renderHook(() => useCreateTransaction());
 
@@ -36,7 +40,6 @@ describe('useCreateTransaction', () => {
       try {
         await result.current.createTransaction(mockInput);
       } catch {
-        // Removido o "(e)" daqui, pois não estávamos usando a variável!
         // Ignora o throw para testar o state
       }
     });

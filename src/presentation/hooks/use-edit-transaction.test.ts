@@ -1,16 +1,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { useEditTransaction } from './use-edit-transaction';
-// Importamos o tipo correto do input para o mock
-import { editTransactionHandler, EditTransactionInput } from '@/application/commands/transaction/edit-transaction/edit-transaction.handler';
+import { EditTransactionUseCase } from '@/application/commands/transaction/edit-transaction/edit-transaction.usecase';
 
-jest.mock('@/application/commands/transaction/edit-transaction/edit-transaction.handler');
+jest.mock('@/application/commands/transaction/edit-transaction/edit-transaction.usecase');
 
 describe('useEditTransaction', () => {
-  // Substituímos o "as any" por "as unknown as Type"
-  const mockInput = { amount: 200 } as unknown as EditTransactionInput;
+  const mockInput = { amount: 200 } as any;
 
   it('deve editar uma transação e gerenciar os estados', async () => {
-    (editTransactionHandler as jest.Mock).mockResolvedValue({ id: '1', amount: 200 });
+    const mockEdit = jest.fn().mockResolvedValue({ id: '1', amount: 200 });
+    (EditTransactionUseCase as jest.Mock).mockImplementation(() => ({
+      editTransaction: mockEdit,
+    }));
     
     const { result } = renderHook(() => useEditTransaction());
 

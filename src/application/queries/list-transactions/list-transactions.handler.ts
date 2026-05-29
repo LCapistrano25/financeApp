@@ -1,10 +1,9 @@
 import { transactionRepository } from '../../../infrastructure/supabase/transaction.repository';
-import { supabase } from '../../../infrastructure/supabase/supabase.client'; 
+import { authService } from '../../../infrastructure/services/supabase-auth.service';
 
 export async function listTransactionsHandler(monthYear: string) {
   // 1. Validação de Usuário
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error("Usuário não autenticado");
+  const user = await authService.getAuthenticatedUser();
 
   // 2. Regra de Negócio: Transformação de Datas
   const [year, month] = monthYear.split("-");
@@ -13,7 +12,7 @@ export async function listTransactionsHandler(monthYear: string) {
 
   // 3. Busca de Dados (Usando o Repositório, sem saber que é Supabase)
   const transactions = await transactionRepository.getTransactionsByDateRange(
-    session.user.id, 
+    user.id, 
     startDate, 
     endDate
   );
@@ -21,7 +20,7 @@ export async function listTransactionsHandler(monthYear: string) {
   // 4. Regra de Negócio: Cálculo de Totais
   const totals = transactions.reduce(
     (acc, curr) => {
-      if (curr.is_paid) {
+      if (curr.isPaid) {
         if (curr.type === "INCOME") acc.income += Number(curr.amount);
         if (curr.type === "EXPENSE") acc.expense += Number(curr.amount);
       }

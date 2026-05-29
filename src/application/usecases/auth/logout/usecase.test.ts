@@ -1,5 +1,5 @@
 import { LogoutUseCase } from './usecase';
-import { IAuthService } from '@/application/services/iauth.service';
+import { IAuthService } from '@/infrastructure/services/iauth.service';
 
 describe('LogoutUseCase', () => {
   let logoutUseCase: LogoutUseCase;

@@ -1,5 +1,5 @@
 import { LoginUseCase } from './usecase';
-import { IAuthService } from '@/application/services/iauth.service';
+import { IAuthService } from '@/infrastructure/services/iauth.service';
 
 describe('LoginUseCase', () => {
   let loginUseCase: LoginUseCase;

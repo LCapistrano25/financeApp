@@ -2,7 +2,7 @@ import { DeleteTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
-import { IAuthService } from '../../../services/iauth.service';
+import { IAuthService } from '@/infrastructure/services/iauth.service';
 
 describe('DeleteTransactionUseCase', () => {
   let useCase: DeleteTransactionUseCase;
@@ -18,7 +18,9 @@ describe('DeleteTransactionUseCase', () => {
     mockAuthService = {
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
-    };
+      signInWithGoogle: jest.fn(),
+      signOut: jest.fn(),
+    } as any;
     useCase = new DeleteTransactionUseCase(mockRepository, mockAuthService);
   });
 

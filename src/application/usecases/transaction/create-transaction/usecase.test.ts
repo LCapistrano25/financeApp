@@ -3,7 +3,7 @@ import { Transaction } from '@/domain/entities/transaction/transaction';
 import { CreateTransactionDto } from './dto';
 import { CreateTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
-import { IAuthService } from '../../../services/iauth.service';
+import { IAuthService } from '@/infrastructure/services/iauth.service';
 
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
@@ -18,7 +18,9 @@ describe('CreateTransactionUseCase', () => {
     mockAuthService = {
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
-    };
+      signInWithGoogle: jest.fn(),
+      signOut: jest.fn(),
+    } as any;
     useCase = new CreateTransactionUseCase(mockRepository, mockAuthService);
   });
 

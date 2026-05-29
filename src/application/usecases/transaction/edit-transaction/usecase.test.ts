@@ -3,10 +3,10 @@ import { ITransactionRepository } from '@/domain/repositories/ITransactionReposi
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
 import { EditTransactionDto } from './dto';
-import { IAuthService } from '../../../services/iauth.service';
+import { IAuthService } from '@/infrastructure/services/iauth.service';
 
 describe('EditTransactionUseCase', () => {
-  let useCase: EditTransactionUseCase;
+  let useCase: EditTransactionUseCase;    
   let mockRepository: jest.Mocked<ITransactionRepository>;
   let mockAuthService: jest.Mocked<IAuthService>;
 
@@ -19,7 +19,9 @@ describe('EditTransactionUseCase', () => {
     mockAuthService = {
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
-    };
+      signInWithGoogle: jest.fn(),
+      signOut: jest.fn(),
+    } as any;
     useCase = new EditTransactionUseCase(mockRepository, mockAuthService);
   });
 

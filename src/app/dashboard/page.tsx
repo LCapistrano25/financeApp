@@ -27,21 +27,18 @@ export default function DashboardPage() {
   // 2. Hook de exclusão (Limpo e isolado)
   const { deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
 
-  type TransactionWithCategory = Transaction & { category?: { name: string } | null };
-
   // 3. Estados de Controle das Gavetas
   const [activeForm, setActiveForm] = useState<TransactionType | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithCategory | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Separando rendas e contas
-  const typedTransactions = transactions as TransactionWithCategory[];
-  const incomes = typedTransactions.filter((t) => t.type === TransactionType.INCOME);
-  const expenses = typedTransactions.filter((t) => t.type === TransactionType.EXPENSE);
+  const incomes = transactions.filter((t) => t.type === TransactionType.INCOME);
+  const expenses = transactions.filter((t) => t.type === TransactionType.EXPENSE);
 
   // --- FUNÇÕES DE AÇÃO ---
 
-  const handleTransactionClick = (transaction: TransactionWithCategory) => {
+  const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsDetailOpen(true);
   };
@@ -67,6 +64,12 @@ export default function DashboardPage() {
     } catch {
       alert("Erro ao excluir!"); // O erro real já foi tratado pelo hook
     }
+  };
+
+  const getTransactionSubtitle = (transaction: Transaction) => {
+    const categoryLabel = transaction.categoryName ?? "Sem categoria";
+    const accountLabel = transaction.accountName;
+    return accountLabel ? `${categoryLabel} • ${accountLabel}` : categoryLabel;
   };
 
   let formTitle = "Nova Transação";
@@ -144,7 +147,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.description || "Renda"}
-                      category={item.category?.name || "Sem categoria"}
+                      category={getTransactionSubtitle(item)}
                       amount={item.amount}
                       type="income"
                       onClick={() => handleTransactionClick(item)}
@@ -162,7 +165,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.description || "Conta"}
-                      category={item.category?.name || "Sem categoria"}
+                      category={getTransactionSubtitle(item)}
                       amount={item.amount}
                       type="expense"
                       onClick={() => handleTransactionClick(item)}
@@ -191,7 +194,8 @@ export default function DashboardPage() {
               description: selectedTransaction.description,
               date: selectedTransaction.date,
               isPaid: selectedTransaction.isPaid,
-              categoryId: selectedTransaction.categoryId
+              categoryId: selectedTransaction.categoryId,
+              accountId: selectedTransaction.accountId
             } : undefined}
             onSuccess={() => {
               setActiveForm(null);

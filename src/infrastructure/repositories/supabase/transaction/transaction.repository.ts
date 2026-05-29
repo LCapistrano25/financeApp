@@ -37,6 +37,30 @@ export class TransactionRepository implements ITransactionRepository {
     return data.map(TransactionMapper.toDomain);
   }
 
+  async hasTransactionsWithCategoryId(categoryId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('category_id', categoryId)
+      .limit(1);
+
+    if (error) throw new Error(error.message);
+
+    return data.length > 0;
+  }
+
+  async hasTransactionsWithAccountId(accountId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('account_id', accountId)
+      .limit(1);
+
+    if (error) throw new Error(error.message);
+
+    return data.length > 0;
+  }
+
   async createTransaction(
     transaction: Transaction
   ): Promise<Transaction> {

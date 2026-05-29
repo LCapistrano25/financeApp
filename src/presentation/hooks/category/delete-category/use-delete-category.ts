@@ -2,12 +2,13 @@ import { useState } from "react";
 import { DeleteCategoryUseCase } from "@/application/usecases/category/delete-category/usecase";
 import { categoryRepository } from "@/infrastructure/repositories/supabase/category/category.repository";
 import { authService } from "@/infrastructure/services/supabase-auth.service";
+import { transactionRepository } from "@/infrastructure/repositories/supabase/transaction/transaction.repository";
 
 export function useDeleteCategory() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const useCase = new DeleteCategoryUseCase(categoryRepository, authService);
+  const useCase = new DeleteCategoryUseCase(categoryRepository, authService, transactionRepository);
 
   const deleteCategory = async (id: string) => {
     const confirmDelete = globalThis.confirm("Tem certeza que deseja apagar esta categoria?");
@@ -34,4 +35,3 @@ export function useDeleteCategory() {
     error,
   };
 }
-

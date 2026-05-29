@@ -2,12 +2,13 @@ import { useState } from "react";
 import { DeleteAccountUseCase } from "@/application/usecases/account/delete-account/usecase";
 import { accountRepository } from "@/infrastructure/repositories/supabase/account/account.repository";
 import { authService } from "@/infrastructure/services/supabase-auth.service";
+import { transactionRepository } from "@/infrastructure/repositories/supabase/transaction/transaction.repository";
 
 export function useDeleteAccount() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const useCase = new DeleteAccountUseCase(accountRepository, authService);
+  const useCase = new DeleteAccountUseCase(accountRepository, authService, transactionRepository);
 
   const deleteAccount = async (id: string) => {
     const confirmDelete = globalThis.confirm("Tem certeza que deseja apagar esta conta?");
@@ -34,4 +35,3 @@ export function useDeleteAccount() {
     error,
   };
 }
-

@@ -3,6 +3,7 @@ import { ITransactionRepository } from '@/domain/repositories/ITransactionReposi
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
 import { IAuthService } from '@/infrastructure/services/iauth.service';
+import type { User } from '@supabase/supabase-js';
 
 describe('DeleteTransactionUseCase', () => {
   let useCase: DeleteTransactionUseCase;
@@ -14,13 +15,13 @@ describe('DeleteTransactionUseCase', () => {
     mockRepository = {
       deleteTransaction: jest.fn(),
       getTransactionById: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<ITransactionRepository>;
     mockAuthService = {
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
       signInWithGoogle: jest.fn(),
       signOut: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<IAuthService>;
     useCase = new DeleteTransactionUseCase(mockRepository, mockAuthService);
   });
 
@@ -30,14 +31,14 @@ describe('DeleteTransactionUseCase', () => {
   });
 
   it('deve lançar erro se a transação não existir', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as any);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
     mockRepository.getTransactionById.mockResolvedValue(null);
 
     await expect(useCase.execute('tx-1')).rejects.toThrow("Transação não encontrada.");
   });
 
   it('deve lançar erro se o usuário não for o dono da transação', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as any);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
 
     const mockTransaction = Transaction.restore({
       id: 'tx-1',
@@ -55,7 +56,7 @@ describe('DeleteTransactionUseCase', () => {
 
   it('deve deletar a transação com sucesso', async () => {
     const userId = 'user-123';
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: userId } as any);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: userId } as unknown as User);
 
     const mockTransaction = Transaction.restore({
       id: 'tx-1',

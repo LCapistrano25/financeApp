@@ -10,8 +10,8 @@ export class CategoryMapper {
 
     static toPersistence(
         category: Category
-    ): any {
-        const persistence: any = {
+    ): Record<string, unknown> {
+        const persistence: Record<string, unknown> = {
             user_id: category.userId,
             name: category.name,
             icon: category.icon,

@@ -1,5 +1,6 @@
 import { supabase } from '../supabase.client';
 import { TransactionRepository } from './transaction.repository';
+import { Transaction } from '@/domain/entities/transaction/transaction';
 
 // Criamos um mock universal para simular a sintaxe encadeada do Supabase
 jest.mock('./supabase.client', () => {
@@ -62,7 +63,7 @@ describe('TransactionRepository', () => {
             date: '2023-10-10',
             isPaid: true,
             userId: 'user-1'
-        } as any;
+        } as unknown as Transaction;
 
         const result = await repository.updateTransaction('tx-123', mockEntity);
 
@@ -81,7 +82,7 @@ describe('TransactionRepository', () => {
             date: '2023-10-10',
             isPaid: true,
             userId: 'user-1'
-        } as any;
+        } as unknown as Transaction;
 
         await expect(repository.updateTransaction('tx-123', mockEntity)).rejects.toThrow('Update Error');
     });

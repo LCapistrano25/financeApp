@@ -2,10 +2,12 @@ import { renderHook, act } from '@testing-library/react';
 import { useCreateTransaction } from './use-create-transaction';
 import { CreateTransactionUseCase } from '@/application/usecases/transaction/create-transaction/usecase';
 
+import { CreateTransactionDto } from '@/application/usecases/transaction/create-transaction/dto';
+
 jest.mock('@/application/usecases/transaction/create-transaction/usecase');
 
 describe('useCreateTransaction', () => {
-  const mockInput = { amount: 100 } as any;
+  const mockInput = { amount: 100 } as unknown as CreateTransactionDto;
 
   it('deve criar uma transação e gerenciar os estados de loading e sucesso', async () => {
     const mockExecute = jest.fn().mockResolvedValue({ id: '1' });

@@ -11,7 +11,7 @@ describe('LogoutUseCase', () => {
       signInWithGoogle: jest.fn(),
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
-    } as any;
+    };
     logoutUseCase = new LogoutUseCase(mockAuthService);
   });
 

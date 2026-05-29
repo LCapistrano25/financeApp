@@ -10,8 +10,8 @@ export class TransactionMapper {
 
     static toPersistence(
         transaction: Transaction
-    ): any {
-        const persistence: any = {
+    ): Record<string, unknown> {
+        const persistence: Record<string, unknown> = {
             user_id: transaction.userId,
             amount: transaction.amount,
             currency: transaction.currency,

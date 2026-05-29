@@ -1,4 +1,3 @@
-import { Transaction } from "@/domain/entities/transaction/transaction";
 import IGetTransactionsUseCase, { GetTransactionsResponse } from "./iusecase";
 import { ITransactionRepository } from "@/domain/repositories/ITransactionRepository";
 import { IAuthService } from "@/infrastructure/services/iauth.service";

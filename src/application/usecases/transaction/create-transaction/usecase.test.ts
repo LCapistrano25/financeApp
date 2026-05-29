@@ -5,6 +5,8 @@ import { CreateTransactionUseCase } from './usecase';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { IAuthService } from '@/infrastructure/services/iauth.service';
 
+import type { User } from '@supabase/supabase-js';
+
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
   let mockRepository: jest.Mocked<ITransactionRepository>;
@@ -14,13 +16,13 @@ describe('CreateTransactionUseCase', () => {
     jest.clearAllMocks();
     mockRepository = {
       createTransaction: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<ITransactionRepository>;
     mockAuthService = {
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
       signInWithGoogle: jest.fn(),
       signOut: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<IAuthService>;
     useCase = new CreateTransactionUseCase(mockRepository, mockAuthService);
   });
 
@@ -46,7 +48,7 @@ describe('CreateTransactionUseCase', () => {
   it('deve criar uma transação com sucesso quando o usuário estiver logado', async () => {
     // Simula usuário logado
     const mockUser = { id: 'user-123' };
-    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser as any);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser as unknown as User);
 
     const payload: CreateTransactionDto = {
       amount: 150,

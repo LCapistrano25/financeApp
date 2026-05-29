@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Transaction } from "@/domain/entities/transaction/transaction";
 import { GetTransactionsUseCase } from "@/application/usecases/transaction/get-transaction/usecase";
 import { authService } from "@/infrastructure/services/supabase-auth.service";
@@ -9,7 +9,8 @@ export function useTransactions(monthYear: string) {
   const [totals, setTotals] = useState({ income: 0, expense: 0, balance: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const useCase = new GetTransactionsUseCase(transactionRepository, authService);
+
+  const useCase = useMemo(() => new GetTransactionsUseCase(transactionRepository, authService), []);
   
   const fetchTransactions = useCallback(async () => {
     setIsLoading(true);
@@ -24,7 +25,7 @@ export function useTransactions(monthYear: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [monthYear]);
+  }, [monthYear, useCase]);
 
   useEffect(() => {
     fetchTransactions();

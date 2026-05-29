@@ -2,10 +2,12 @@ import { renderHook, act } from '@testing-library/react';
 import { useEditTransaction } from './use-edit-transaction';
 import { EditTransactionUseCase } from '@/application/usecases/transaction/edit-transaction/usecase';
 
+import { EditTransactionDto } from '@/application/usecases/transaction/edit-transaction/dto';
+
 jest.mock('@/application/usecases/transaction/edit-transaction/usecase');
 
 describe('useEditTransaction', () => {
-  const mockInput = { amount: 200 } as any;
+  const mockInput = { amount: 200 } as unknown as EditTransactionDto;
 
   it('deve editar uma transação e gerenciar os estados', async () => {
     const mockEdit = jest.fn().mockResolvedValue({ id: '1', amount: 200 });

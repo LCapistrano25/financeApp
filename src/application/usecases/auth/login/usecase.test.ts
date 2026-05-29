@@ -11,7 +11,7 @@ describe('LoginUseCase', () => {
       signOut: jest.fn(),
       getAuthenticatedUser: jest.fn(),
       getCurrentUser: jest.fn(),
-    } as any;
+    };
     loginUseCase = new LoginUseCase(mockAuthService);
   });
 

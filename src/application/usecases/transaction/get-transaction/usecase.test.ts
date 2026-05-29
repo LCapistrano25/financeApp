@@ -3,6 +3,7 @@ import { ITransactionRepository } from '@/domain/repositories/ITransactionReposi
 import { IAuthService } from '@/infrastructure/services/iauth.service';
 import { Transaction } from '@/domain/entities/transaction/transaction';
 import { TransactionType } from '@/domain/enum/transaction-type';
+import type { User } from '@supabase/supabase-js';
 
 describe('GetTransactionsUseCase', () => {
   let useCase: GetTransactionsUseCase;
@@ -12,10 +13,10 @@ describe('GetTransactionsUseCase', () => {
   beforeEach(() => {
     mockRepository = {
       getTransactionsByDateRange: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<ITransactionRepository>;
     mockAuthService = {
       getAuthenticatedUser: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<IAuthService>;
     useCase = new GetTransactionsUseCase(mockRepository, mockAuthService);
   });
 
@@ -25,7 +26,7 @@ describe('GetTransactionsUseCase', () => {
   });
 
   it('deve retornar transações e sumário corretamente', async () => {
-    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as any);
+    mockAuthService.getAuthenticatedUser.mockResolvedValue({ id: 'user-123' } as unknown as User);
 
     const mockTransactions = [
       { amount: 1000, type: TransactionType.INCOME, isPaid: true },

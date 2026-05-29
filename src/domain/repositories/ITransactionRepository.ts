@@ -1,10 +1,9 @@
-import { Transaction } from '../entities/transaction';
+import { Transaction } from '../entities/transaction/transaction';
 
 export interface ITransactionRepository {
+  getTransactionById(id: string): Promise<Transaction | null>;
   getTransactionsByDateRange(userId: string, startDate: string, endDate: string): Promise<Transaction[]>;
-  
-  // Já vamos deixar o contrato de criação pronto para o próximo passo!
-  createTransaction(transaction: Omit<Transaction, 'id' | 'created_at'>): Promise<Transaction>;
-  updateTransaction(id: string, transaction: Partial<Omit<Transaction, 'id' | 'user_id' | 'created_at'>>): Promise<Transaction>;
+  createTransaction(transaction: Transaction): Promise<Transaction>;
+  updateTransaction(id: string, transaction: Transaction): Promise<Transaction>;
   deleteTransaction(id: string): Promise<void>;
 }

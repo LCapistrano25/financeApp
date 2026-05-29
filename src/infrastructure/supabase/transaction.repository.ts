@@ -1,8 +1,24 @@
 import { supabase } from './supabase.client';
 import { ITransactionRepository } from '../../domain/repositories/ITransactionRepository';
-import { Transaction } from '../../domain/entities/transaction';
+import { Transaction } from '../../domain/entities/transaction/transaction';
+import { TransactionMapper } from '../mappers/transaction.mapper';
 
 export class TransactionRepository implements ITransactionRepository {
+  async getTransactionById(id: string): Promise<Transaction | null> {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*, category:categories(name)')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found
+      throw new Error(error.message);
+    }
+
+    return TransactionMapper.toDomain(data);
+  }
+
   async getTransactionsByDateRange(
     userId: string,
     startDate: string,
@@ -18,37 +34,37 @@ export class TransactionRepository implements ITransactionRepository {
 
     if (error) throw new Error(error.message);
 
-    return data;
+    return data.map(TransactionMapper.toDomain);
   }
 
   async createTransaction(
-    transaction: Omit<Transaction, 'id' | 'created_at'>
+    transaction: Transaction
   ): Promise<Transaction> {
     const { data, error } = await supabase
       .from('transactions')
-      .insert(transaction)
+      .insert(TransactionMapper.toPersistence(transaction))
       .select()
       .single();
 
     if (error) throw new Error(error.message);
 
-    return data;
+    return TransactionMapper.toDomain(data);
   }
 
   async updateTransaction(
     id: string,
-    transaction: Partial<Omit<Transaction, 'id' | 'user_id' | 'created_at'>>
+    transaction: Transaction
   ): Promise<Transaction> {
     const { data, error } = await supabase
       .from('transactions')
-      .update(transaction)
+      .update(TransactionMapper.toPersistence(transaction))
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
 
-    return data;
+    return TransactionMapper.toDomain(data);
   }
 
   async deleteTransaction(id: string): Promise<void> {

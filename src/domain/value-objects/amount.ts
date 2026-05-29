@@ -13,11 +13,11 @@ export class Amount {
 
   private validate(): void {
     if (!Number.isFinite(this.rawValue)) {
-      throw new Error("O valor deve ser um número finito.");
+      throw new TypeError("O valor deve ser um numero finito.");
     }
 
     if (this.rawValue <= 0) {
-      throw new Error("O valor deve ser maior que zero.");
+      throw new RangeError("O valor deve ser maior que zero.");
     }
   }
 }

@@ -1,1 +1,5 @@
-export type RepeatFrequency = 'MONTHS' | 'WEEKS' | 'DAYS';
+export enum RepeatFrequency {
+  MONTHS = 'MONTHS',
+  WEEKS = 'WEEKS',
+  DAYS = 'DAYS',
+}

@@ -17,6 +17,11 @@ export class Account {
     return new Account(props);
   }
 
+  public update(props: Partial<AccountProps>): void {
+    Object.assign(this.props, props);
+    this.validate();
+  }
+
   get id(): string | undefined { return this.props.id; }
   get name(): string { return this.props.name; }
   get icon(): string { return this.props.icon; }

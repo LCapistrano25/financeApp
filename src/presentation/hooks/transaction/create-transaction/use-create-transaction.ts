@@ -4,6 +4,7 @@ import { transactionRepository } from '@/infrastructure/repositories/supabase/tr
 import { authService } from '@/infrastructure/services/supabase-auth.service';
 import { CreateTransactionUseCase } from '@/application/usecases/transaction/create-transaction/usecase';
 import { categoryRepository } from '@/infrastructure/repositories/supabase/category/category.repository';
+import { accountRepository } from '@/infrastructure/repositories/supabase/account/account.repository';
 
 export function useCreateTransaction() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,7 +18,7 @@ export function useCreateTransaction() {
 
     try {
       // O Hook não sabe nada sobre Supabase, apenas chama o Handler!
-      const newTransaction = await new CreateTransactionUseCase(transactionRepository, authService, categoryRepository).execute(data);
+      const newTransaction = await new CreateTransactionUseCase(transactionRepository, authService, categoryRepository, accountRepository).execute(data);
       
       setIsSuccess(true);
       return newTransaction; // Retornamos caso o componente queira fazer algo com a transação criada

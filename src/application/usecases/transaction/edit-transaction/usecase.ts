@@ -4,12 +4,14 @@ import { Transaction } from "@/domain/entities/transaction/transaction";
 import { IEditTransactionUseCase } from "./iusecase";
 import { IAuthService } from "@/application/ports/iauth.service";
 import { ICategoryRepository } from "@/domain/repositories/ICategoryRepository";
+import { IAccountRepository } from "@/domain/repositories/IAccountRepository";
 
 export class EditTransactionUseCase implements IEditTransactionUseCase {
   constructor(
     private readonly repository: ITransactionRepository,
     private readonly authService: IAuthService,
-    private readonly categoryRepository: ICategoryRepository
+    private readonly categoryRepository: ICategoryRepository,
+    private readonly accountRepository: IAccountRepository
   ) {}
   
   async editTransaction(id: string, input: EditTransactionDto): Promise<Transaction> {
@@ -36,6 +38,16 @@ export class EditTransactionUseCase implements IEditTransactionUseCase {
         }
         if (category.type !== input.type) {
           throw new Error("A categoria selecionada não é compatível com o tipo da transação.");
+        }
+      }
+
+      if (input.account_id) {
+        const account = await this.accountRepository.getAccountById(input.account_id);
+        if (!account) {
+          throw new Error("Conta não encontrada.");
+        }
+        if (account.userId !== user.id) {
+          throw new Error("Você não tem permissão para usar esta conta.");
         }
       }
     

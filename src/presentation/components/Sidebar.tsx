@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LogOut, Moon, Sun, User as UserIcon, Menu, X, LayoutDashboard, Tags } from "lucide-react";
+import { LogOut, Moon, Sun, User as UserIcon, Menu, X, LayoutDashboard, Tags, Wallet } from "lucide-react";
 import { useAuth } from "@/presentation/hooks/auth/use-auth"; 
 import Image from "next/image";
 import { useTheme } from "next-themes";
@@ -76,6 +76,15 @@ export function Sidebar() {
                     >
                         <Tags size={22} className="group-hover:scale-110 transition-transform text-slate-500 dark:text-slate-300" />
                         <span className="font-medium">Categorias</span>
+                    </Link>
+
+                    <Link
+                        href="/dashboard/accounts"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                    >
+                        <Wallet size={22} className="group-hover:scale-110 transition-transform text-slate-500 dark:text-slate-300" />
+                        <span className="font-medium">Contas</span>
                     </Link>
 
                     {/* Botão Único de Alternar Tema */}

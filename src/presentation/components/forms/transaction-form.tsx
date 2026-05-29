@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
-import type { Transaction } from "@/domain/entities/transaction/transaction";
 import { TransactionType } from "@/domain/enum/transaction-type";
 
 // IMPORTAMOS OS NOSSOS HOOKS DE CASO DE USO

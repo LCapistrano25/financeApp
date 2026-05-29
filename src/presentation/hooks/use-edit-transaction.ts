@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { editTransactionHandler, EditTransactionInput } from '@/application/commands/transaction/edit-transaction/edit-transaction.handler';
+import { EditTransactionUseCase } from '@/application/commands/transaction/edit-transaction/edit-transaction.usecase';
+import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
+import { EditTransactionDto } from '@/application/commands/transaction/edit-transaction/edit-transaction.dto';
 
 export function useEditTransaction() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-
-  const editTransaction = async (id: string, data: EditTransactionInput) => {
+  const editTransactionUseCase = new EditTransactionUseCase(transactionRepository);
+  
+  const editTransaction = async (id: string, data: EditTransactionDto) => {
     setIsLoading(true);
     setError(null);
     setIsSuccess(false);
 
     try {
-      const updatedTransaction = await editTransactionHandler(id, data);
+      const updatedTransaction = await editTransactionUseCase.editTransaction(id, data);
       
       setIsSuccess(true);
       return updatedTransaction;

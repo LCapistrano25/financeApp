@@ -1,6 +1,6 @@
 import { ITransactionRepository } from "@/domain/repositories/ITransactionRepository";
 import { Transaction } from "@/domain/entities/transaction/transaction";
-import { supabase } from "../supabase.client";
+import { supabase } from "@/infrastructure/repositories/supabase/supabase.client";
 import { TransactionMapper } from "@/infrastructure/mappers/transaction.mapper";
 
 export class TransactionRepository implements ITransactionRepository {

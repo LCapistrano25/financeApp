@@ -1,5 +1,5 @@
-import { Transaction } from "../entities/transaction/transaction";
-import { TransactionType } from "../enum/transaction-type";
+import { Transaction } from "@/domain/entities/transaction/transaction";
+import { TransactionType } from "@/domain/enum/transaction-type";
 
 export class TransactionSummary {
   public readonly income: number;

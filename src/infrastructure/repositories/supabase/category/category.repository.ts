@@ -1,7 +1,7 @@
 import { Category } from "@/domain/entities/category/category";
 import { ICategoryRepository } from "@/domain/repositories/ICategoryRepository";
 import { CategoryMapper } from "@/infrastructure/mappers/category.mapper";
-import { supabase } from "../supabase.client";
+import { supabase } from "@/infrastructure/repositories/supabase/supabase.client";
 
 export class CategoryRepository implements ICategoryRepository {
   async getCategoryById(id: string): Promise<Category | null> {

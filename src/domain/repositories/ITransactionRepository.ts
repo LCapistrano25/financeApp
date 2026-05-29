@@ -1,4 +1,4 @@
-import { Transaction } from '../entities/transaction/transaction';
+import { Transaction } from '@/domain/entities/transaction/transaction';
 
 export interface ITransactionRepository {
   getTransactionById(id: string): Promise<Transaction | null>;

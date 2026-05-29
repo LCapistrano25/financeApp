@@ -1,7 +1,7 @@
-import { RepeatFrequency } from "../../enum/repeat-frequency";
-import { TransactionType } from "../../enum/transaction-type";
-import { Amount } from "../../value-objects/amount";
-import { TransactionProps } from "./transactions.props";
+import { RepeatFrequency } from "@/domain/enum/repeat-frequency";
+import { TransactionType } from "@/domain/enum/transaction-type";
+import { Amount } from "@/domain/value-objects/amount";
+import { TransactionProps } from "@/domain/entities/transaction/transactions.props";
 
 export class Transaction {
   private constructor(private readonly props: TransactionProps) {

@@ -1,6 +1,6 @@
 import { TransactionSummary } from './transaction-summary';
-import { Transaction } from '../entities/transaction/transaction';
-import { TransactionType } from '../enum/transaction-type';
+import { Transaction } from '@/domain/entities/transaction/transaction';
+import { TransactionType } from '@/domain/enum/transaction-type';
 
 describe('TransactionSummary Value Object', () => {
   it('deve calcular totais e balanço corretamente', () => {

@@ -1,8 +1,8 @@
-import { Transaction } from '../../../../domain/entities/transaction/transaction';
+import { Transaction } from '@/domain/entities/transaction/transaction';
 import { CreateTransactionDto } from './dto';
 import { ITransactionRepository } from '@/domain/repositories/ITransactionRepository';
 import { ICreateTransactionUseCase } from './iusecase';
-import { IAuthService } from '../../../../infrastructure/services/iauth.service';
+import { IAuthService } from '@/application/ports/iauth.service';
 
 export class CreateTransactionUseCase implements ICreateTransactionUseCase {
   constructor(

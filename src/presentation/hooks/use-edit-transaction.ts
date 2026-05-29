@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { EditTransactionUseCase } from '@/application/commands/transaction/edit-transaction/edit-transaction.usecase';
+import { EditTransactionUseCase } from '@/application/usecases/transaction/edit-transaction/edit-transaction.usecase';
 import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
 import { authService } from '@/infrastructure/services/supabase-auth.service';
-import { EditTransactionDto } from '@/application/commands/transaction/edit-transaction/edit-transaction.dto';
+import { EditTransactionDto } from '@/application/usecases/transaction/edit-transaction/edit-transaction.dto';
 
 export function useEditTransaction() {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,4 +1,4 @@
-import { DeleteTransactionUseCase } from '@/application/commands/transaction/delete-transaction/delete-transaction.usecase';
+import { DeleteTransactionUseCase } from '@/application/usecases/transaction/delete-transaction/delete-transaction.usecase';
 import { transactionRepository } from '@/infrastructure/supabase/transaction.repository';
 import { authService } from '@/infrastructure/services/supabase-auth.service';
 import { useState } from 'react';

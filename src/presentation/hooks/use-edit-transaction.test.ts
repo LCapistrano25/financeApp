@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useEditTransaction } from './use-edit-transaction';
-import { EditTransactionUseCase } from '@/application/commands/transaction/edit-transaction/edit-transaction.usecase';
+import { EditTransactionUseCase } from '@/application/usecases/transaction/edit-transaction/edit-transaction.usecase';
 
 jest.mock('@/application/commands/transaction/edit-transaction/edit-transaction.usecase');
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // <-- 1. IMPORTAMOS O ROUTER DO NEXT
-import { loginWithGoogleHandler } from '@/application/commands/auth/login-with-google.handler';
-import { logoutHandler } from '@/application/commands/auth/logout.handler';
+import { loginWithGoogleHandler } from '@/application/usecases/auth/login-with-google.handler';
+import { logoutHandler } from '@/application/usecases/auth/logout.handler';
 import { supabase } from '@/infrastructure/supabase/supabase.client';
 import type { User } from '@supabase/supabase-js';
 

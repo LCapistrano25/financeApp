@@ -1,5 +1,6 @@
 import { transactionRepository } from '../../../infrastructure/supabase/transaction.repository';
 import { authService } from '../../../infrastructure/services/supabase-auth.service';
+import { TransactionType } from '@/domain/enum/transaction-type';
 
 export async function listTransactionsHandler(monthYear: string) {
   // 1. Validação de Usuário
@@ -21,8 +22,8 @@ export async function listTransactionsHandler(monthYear: string) {
   const totals = transactions.reduce(
     (acc, curr) => {
       if (curr.isPaid) {
-        if (curr.type === "INCOME") acc.income += Number(curr.amount);
-        if (curr.type === "EXPENSE") acc.expense += Number(curr.amount);
+        if (curr.type === TransactionType.INCOME) acc.income += Number(curr.amount);
+        if (curr.type === TransactionType.EXPENSE) acc.expense += Number(curr.amount);
       }
       return acc;
     },

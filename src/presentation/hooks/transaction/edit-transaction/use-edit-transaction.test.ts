@@ -7,7 +7,14 @@ import { EditTransactionDto } from '@/application/usecases/transaction/edit-tran
 jest.mock('@/application/usecases/transaction/edit-transaction/usecase');
 
 describe('useEditTransaction', () => {
-  const mockInput = { amount: 200 } as unknown as EditTransactionDto;
+  const mockInput: EditTransactionDto = {
+    amount: 200,
+    currency: 'BRL',
+    type: 'EXPENSE',
+    date: '2023-10-10',
+    category_id: 'cat-1',
+    account_id: 'acc-1',
+  };
 
   it('deve editar uma transação e gerenciar os estados', async () => {
     const mockEdit = jest.fn().mockResolvedValue({ id: '1', amount: 200 });

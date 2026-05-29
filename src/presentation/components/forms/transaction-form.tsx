@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
-import { TransactionType } from "@/domain/enum/transaction-type";
 import { useCategories } from "@/presentation/hooks/category/get-categories/use-get-categories";
 import { useAccounts } from "@/presentation/hooks/account/get-accounts/use-get-accounts";
 
@@ -21,7 +20,7 @@ type TransactionFormInitialData = {
 };
 
 type TransactionFormProps = Readonly<{
-  type: TransactionType;
+  type: "INCOME" | "EXPENSE";
   initialData?: TransactionFormInitialData;
   onSuccess: () => void;
 }>;
@@ -34,7 +33,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
   const isSubmitting = isCreating || isUpdating;
 
   const { categories, isLoading: isLoadingCategories } = useCategories();
-  const categoriesForType = categories.filter((c) => c.type === type);
+  const categoriesForType = categories.filter((c) => String(c.type) === type);
 
   const { accounts, isLoading: isLoadingAccounts } = useAccounts();
 
@@ -49,6 +48,8 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
+    if (!categoryId) return alert("Selecione uma categoria.");
+    if (!accountId) return alert("Selecione uma conta.");
 
     try {
       const payload = {
@@ -58,8 +59,8 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
         date: new Date(date).toISOString(),
         is_paid: isPaid,
         currency: 'BRL',
-        ...(categoryId ? { category_id: categoryId } : {}),
-        ...(accountId ? { account_id: accountId } : {}),
+        category_id: categoryId,
+        account_id: accountId,
       };
 
       if (isEditing && initialData) {
@@ -77,7 +78,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     }
   };
 
-  const transactionTypeName = type === TransactionType.INCOME ? "Receita" : "Despesa";
+  const transactionTypeName = type === "INCOME" ? "Receita" : "Despesa";
 
   let submitButtonContent;
   if (isSubmitting) {
@@ -88,7 +89,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     submitButtonContent = `Confirmar ${transactionTypeName}`;
   }
 
-  const typeClasses = type === TransactionType.INCOME 
+  const typeClasses = type === "INCOME" 
     ? "bg-emerald-500 shadow-emerald-500/20" 
     : "bg-red-500 shadow-red-500/20";
 
@@ -158,10 +159,17 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
             id="category"
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            disabled={isLoadingCategories}
+            disabled={isLoadingCategories || categoriesForType.length === 0}
             className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100"
+            required
           >
-            <option value="">{isLoadingCategories ? "Carregando..." : "Sem categoria"}</option>
+            <option value="" disabled>
+              {isLoadingCategories
+                ? "Carregando..."
+                : categoriesForType.length === 0
+                  ? "Crie uma categoria primeiro"
+                  : "Selecione uma categoria"}
+            </option>
             {categoriesForType.map((c) => (
               <option key={c.id} value={c.id}>
                 {`${c.icon ?? "🏷️"} ${c.name}`}
@@ -176,10 +184,17 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
             id="account"
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
-            disabled={isLoadingAccounts}
+            disabled={isLoadingAccounts || accounts.length === 0}
             className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100"
+            required
           >
-            <option value="">{isLoadingAccounts ? "Carregando..." : "Sem conta"}</option>
+            <option value="" disabled>
+              {isLoadingAccounts
+                ? "Carregando..."
+                : accounts.length === 0
+                  ? "Crie uma conta primeiro"
+                  : "Selecione uma conta"}
+            </option>
             {accounts.map((a) => (
               <option key={a.id} value={a.id}>
                 {`${a.icon ?? "🏦"} ${a.name}`}

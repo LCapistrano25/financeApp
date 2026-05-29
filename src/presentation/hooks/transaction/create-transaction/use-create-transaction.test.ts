@@ -7,7 +7,14 @@ import { CreateTransactionDto } from '@/application/usecases/transaction/create-
 jest.mock('@/application/usecases/transaction/create-transaction/usecase');
 
 describe('useCreateTransaction', () => {
-  const mockInput = { amount: 100 } as unknown as CreateTransactionDto;
+  const mockInput: CreateTransactionDto = {
+    amount: 100,
+    currency: 'BRL',
+    type: 'EXPENSE',
+    date: '2023-10-10',
+    category_id: 'cat-1',
+    account_id: 'acc-1',
+  };
 
   it('deve criar uma transação e gerenciar os estados de loading e sucesso', async () => {
     const mockExecute = jest.fn().mockResolvedValue({ id: '1' });

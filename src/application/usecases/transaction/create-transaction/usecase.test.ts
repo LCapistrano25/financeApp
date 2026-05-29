@@ -43,9 +43,11 @@ describe('CreateTransactionUseCase', () => {
     const payload: CreateTransactionDto = {
       amount: 100,
       currency: 'BRL',
-      type: TransactionType.INCOME,
+      type: 'INCOME',
       date: '2023-10-10',
       is_paid: true,
+      category_id: 'cat-1',
+      account_id: 'acc-1',
     };
 
     await expect(
@@ -62,13 +64,38 @@ describe('CreateTransactionUseCase', () => {
     const payload: CreateTransactionDto = {
       amount: 150,
       currency: 'BRL',
-      type: TransactionType.EXPENSE,
+      type: 'EXPENSE',
       date: '2023-10-11',
       is_paid: false,
-      description: 'Teste de criação'
+      description: 'Teste de criação',
+      category_id: 'cat-1',
+      account_id: 'acc-1',
     };
 
-    const mockTransaction = Transaction.create({ ...payload, user_id: 'user-123' });
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: mockUser.id,
+        name: 'Mercado',
+        icon: '🛒',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: mockUser.id,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    const mockTransaction = Transaction.create({ ...payload, type: TransactionType.EXPENSE, user_id: 'user-123' });
     mockRepository.createTransaction.mockResolvedValue(mockTransaction);
 
     const result = await useCase.execute(payload);
@@ -90,10 +117,11 @@ describe('CreateTransactionUseCase', () => {
     const payload: CreateTransactionDto = {
       amount: 10,
       currency: 'BRL',
-      type: TransactionType.EXPENSE,
+      type: 'EXPENSE',
       date: '2023-10-11',
       is_paid: true,
       category_id: 'cat-1',
+      account_id: 'acc-1',
     };
 
     mockCategoryRepository.getCategoryById.mockResolvedValue(
@@ -108,7 +136,18 @@ describe('CreateTransactionUseCase', () => {
       })
     );
 
-    const mockTransaction = Transaction.create({ ...payload, user_id: mockUser.id });
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: mockUser.id,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    const mockTransaction = Transaction.create({ ...payload, type: TransactionType.EXPENSE, user_id: mockUser.id });
     mockRepository.createTransaction.mockResolvedValue(mockTransaction);
 
     await useCase.execute(payload);
@@ -123,11 +162,24 @@ describe('CreateTransactionUseCase', () => {
     const payload: CreateTransactionDto = {
       amount: 10,
       currency: 'BRL',
-      type: TransactionType.EXPENSE,
+      type: 'EXPENSE',
       date: '2023-10-11',
       is_paid: true,
+      category_id: 'cat-1',
       account_id: 'acc-1',
     };
+
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: mockUser.id,
+        name: 'Mercado',
+        icon: '🛒',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
 
     mockAccountRepository.getAccountById.mockResolvedValue(
       Account.restore({
@@ -140,7 +192,7 @@ describe('CreateTransactionUseCase', () => {
       })
     );
 
-    const mockTransaction = Transaction.create({ ...payload, user_id: mockUser.id });
+    const mockTransaction = Transaction.create({ ...payload, type: TransactionType.EXPENSE, user_id: mockUser.id });
     mockRepository.createTransaction.mockResolvedValue(mockTransaction);
 
     await useCase.execute(payload);
@@ -155,11 +207,24 @@ describe('CreateTransactionUseCase', () => {
     const payload: CreateTransactionDto = {
       amount: 10,
       currency: 'BRL',
-      type: TransactionType.EXPENSE,
+      type: 'EXPENSE',
       date: '2023-10-11',
       is_paid: true,
+      category_id: 'cat-1',
       account_id: 'acc-1',
     };
+
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: mockUser.id,
+        name: 'Mercado',
+        icon: '🛒',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
 
     mockAccountRepository.getAccountById.mockResolvedValue(null);
 
@@ -174,10 +239,11 @@ describe('CreateTransactionUseCase', () => {
     const payload: CreateTransactionDto = {
       amount: 10,
       currency: 'BRL',
-      type: TransactionType.EXPENSE,
+      type: 'EXPENSE',
       date: '2023-10-11',
       is_paid: true,
       category_id: 'cat-1',
+      account_id: 'acc-1',
     };
 
     mockCategoryRepository.getCategoryById.mockResolvedValue(
@@ -188,6 +254,17 @@ describe('CreateTransactionUseCase', () => {
         icon: '💰',
         color: '#10b981',
         type: CategoryType.INCOME,
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: mockUser.id,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
         created_at: new Date().toISOString(),
       })
     );

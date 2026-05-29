@@ -44,7 +44,9 @@ describe('EditTransactionUseCase', () => {
       amount: 200,
       currency: 'BRL',
       type: TransactionType.EXPENSE,
-      date: '2023-10-10'
+      date: '2023-10-10',
+      category_id: 'cat-1',
+      account_id: 'acc-1',
     })).rejects.toThrow("Você precisa estar logado para editar uma transação.");
   });
 
@@ -56,7 +58,9 @@ describe('EditTransactionUseCase', () => {
       amount: 200,
       currency: 'BRL',
       type: TransactionType.EXPENSE,
-      date: '2023-10-10'
+      date: '2023-10-10',
+      category_id: 'cat-1',
+      account_id: 'acc-1',
     })).rejects.toThrow("Transação não encontrada.");
   });
 
@@ -78,7 +82,9 @@ describe('EditTransactionUseCase', () => {
       amount: 200,
       currency: 'BRL',
       type: TransactionType.EXPENSE,
-      date: '2023-10-10'
+      date: '2023-10-10',
+      category_id: 'cat-1',
+      account_id: 'acc-1',
     })).rejects.toThrow("Você não tem permissão para editar esta transação.");
   });
 
@@ -98,7 +104,37 @@ describe('EditTransactionUseCase', () => {
     mockRepository.getTransactionById.mockResolvedValue(mockTransaction);
     mockRepository.updateTransaction.mockImplementation((id, entity) => Promise.resolve(entity));
 
-    const input: EditTransactionDto = { amount: 500, currency: 'BRL', type: TransactionType.EXPENSE, date: '2023-10-10' };
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: userId,
+        name: 'Mercado',
+        icon: '🛒',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: userId,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    const input: EditTransactionDto = {
+      amount: 500,
+      currency: 'BRL',
+      type: TransactionType.EXPENSE,
+      date: '2023-10-10',
+      category_id: 'cat-1',
+      account_id: 'acc-1',
+    };
     const result = await useCase.editTransaction('tx-1', input);
 
     expect(result.amount).toBe(500);
@@ -142,7 +178,19 @@ describe('EditTransactionUseCase', () => {
       type: TransactionType.EXPENSE,
       date: '2023-10-10',
       category_id: 'cat-1',
+      account_id: 'acc-1',
     };
+
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: userId,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
+        created_at: new Date().toISOString(),
+      })
+    );
 
     await useCase.editTransaction('tx-1', input);
     expect(mockCategoryRepository.getCategoryById).toHaveBeenCalledWith('cat-1');
@@ -175,11 +223,24 @@ describe('EditTransactionUseCase', () => {
       })
     );
 
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: userId,
+        name: 'Mercado',
+        icon: '🛒',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
+
     const input: EditTransactionDto = {
       amount: 500,
       currency: 'BRL',
       type: TransactionType.EXPENSE,
       date: '2023-10-10',
+      category_id: 'cat-1',
       account_id: 'acc-1',
     };
 
@@ -202,6 +263,18 @@ describe('EditTransactionUseCase', () => {
     });
     mockRepository.getTransactionById.mockResolvedValue(mockTransaction);
 
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: userId,
+        name: 'Mercado',
+        icon: '🛒',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
+
     mockAccountRepository.getAccountById.mockResolvedValue(null);
 
     const input: EditTransactionDto = {
@@ -209,6 +282,7 @@ describe('EditTransactionUseCase', () => {
       currency: 'BRL',
       type: TransactionType.EXPENSE,
       date: '2023-10-10',
+      category_id: 'cat-1',
       account_id: 'acc-1',
     };
 
@@ -249,7 +323,19 @@ describe('EditTransactionUseCase', () => {
       type: TransactionType.EXPENSE,
       date: '2023-10-10',
       category_id: 'cat-1',
+      account_id: 'acc-1',
     };
+
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: userId,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
+        created_at: new Date().toISOString(),
+      })
+    );
 
     await expect(useCase.editTransaction('tx-1', input)).rejects.toThrow(
       "A categoria selecionada não é compatível com o tipo da transação."

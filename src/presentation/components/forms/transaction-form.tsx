@@ -3,22 +3,22 @@
 import * as React from "react";
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
-import type { Transaction } from "@/domain/entities/transaction";
+import { TransactionType } from "@/domain/enum/transaction-type";
 
 // IMPORTAMOS OS NOSSOS HOOKS DE CASO DE USO
-import { useCreateTransaction } from "@/presentation/hooks/use-create-transaction";
-import { useEditTransaction } from "@/presentation/hooks/use-edit-transaction";
+import { useCreateTransaction } from "@/presentation/hooks/transaction/create-transaction/use-create-transaction";
+import { useEditTransaction } from "@/presentation/hooks/transaction/edit-transaction/use-edit-transaction";
 
 type TransactionFormInitialData = {
-  readonly id: Transaction["id"];
-  readonly amount: Transaction["amount"];
-  readonly description?: Transaction["description"];
-  readonly date: Transaction["date"];
-  readonly is_paid: Transaction["is_paid"];
+  readonly id: string;
+  readonly amount: number;
+  readonly description?: string;
+  readonly date: string;
+  readonly isPaid: boolean;
 };
 
 type TransactionFormProps = Readonly<{
-  type: 'INCOME' | 'EXPENSE';
+  type: TransactionType;
   initialData?: TransactionFormInitialData;
   onSuccess: () => void;
 }>;
@@ -37,7 +37,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
   // Puxamos 'title' se existir, ou o fallback 'description'
   const [title, setTitle] = useState(initialData?.description || "");
   const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
-  const [isPaid, setIsPaid] = useState(initialData?.is_paid ?? true);
+  const [isPaid, setIsPaid] = useState(initialData?.isPaid ?? true);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,7 +69,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     }
   };
 
-  const transactionTypeName = type === "INCOME" ? "Receita" : "Despesa";
+  const transactionTypeName = type === TransactionType.INCOME ? "Receita" : "Despesa";
 
   let submitButtonContent;
   if (isSubmitting) {
@@ -80,7 +80,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
     submitButtonContent = `Confirmar ${transactionTypeName}`;
   }
 
-  const typeClasses = type === "INCOME" 
+  const typeClasses = type === TransactionType.INCOME 
     ? "bg-emerald-500 shadow-emerald-500/20" 
     : "bg-red-500 shadow-red-500/20";
 

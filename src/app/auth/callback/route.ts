@@ -6,6 +6,10 @@ export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
 
+    // Redirecionamento correto para ambientes hospedados (Vercel, etc)
+    // Se estivermos em produção, precisamos garantir que o redirecionamento não vá para localhost
+    const origin = requestUrl.origin;
+
     if (code) {
         const cookieStore = await cookies();
         const supabase = createServerClient(
@@ -27,5 +31,7 @@ export async function GET(request: Request) {
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+    // URL absoluta para evitar problemas com proxies
+    const redirectUrl = new URL('/dashboard', origin);
+    return NextResponse.redirect(redirectUrl);
 }

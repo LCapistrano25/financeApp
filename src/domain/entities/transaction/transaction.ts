@@ -24,7 +24,6 @@ export class Transaction {
     }
     return new Transaction(props);
   }
-
   
   public update(props: Partial<TransactionProps>): void {
     Object.assign(this.props, props);

@@ -1,14 +1,33 @@
 import { createServerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
 
-    // Redirecionamento correto para ambientes hospedados (Vercel, etc)
-    // Se estivermos em produção, precisamos garantir que o redirecionamento não vá para localhost
-    const origin = requestUrl.origin;
+    const headerStore = await headers();
+    const envBaseUrl =
+        process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL ??
+        null;
+
+    let originFromEnv: string | null = null;
+    if (envBaseUrl) {
+        try {
+            originFromEnv = new URL(envBaseUrl).origin;
+        } catch {
+            originFromEnv = null;
+        }
+    }
+
+    const forwardedHost =
+        headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+    const forwardedProto = headerStore.get("x-forwarded-proto");
+    const originFromHeaders = forwardedHost
+        ? `${forwardedProto ?? "https"}://${forwardedHost}`
+        : null;
+
+    const origin = originFromEnv ?? originFromHeaders ?? requestUrl.origin;
 
     if (code) {
         const cookieStore = await cookies();
@@ -31,7 +50,6 @@ export async function GET(request: Request) {
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    // URL absoluta para evitar problemas com proxies
     const redirectUrl = new URL('/dashboard', origin);
     return NextResponse.redirect(redirectUrl);
 }

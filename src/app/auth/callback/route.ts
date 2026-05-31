@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
+    const nextParam = requestUrl.searchParams.get("next");
 
     const headerStore = await headers();
     const envBaseUrl =
@@ -50,6 +51,12 @@ export async function GET(request: Request) {
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    const redirectUrl = new URL('/dashboard', origin);
+    const defaultPath = "/dashboard";
+    const safeNextPath =
+        nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
+            ? nextParam
+            : defaultPath;
+
+    const redirectUrl = new URL(safeNextPath, origin);
     return NextResponse.redirect(redirectUrl);
 }

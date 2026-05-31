@@ -77,7 +77,7 @@ describe('useAuth', () => {
     expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
       provider: 'google',
       options: expect.objectContaining({
-        redirectTo: expect.stringContaining('/auth/callback'),
+        redirectTo: expect.stringContaining('/auth/callback?next='),
       }),
     });
   });

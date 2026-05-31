@@ -36,7 +36,7 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (nextPath: string = '/dashboard') => {
     setIsLoading(true);
     setError(null);
 
@@ -58,7 +58,10 @@ export function useAuth() {
         ? baseRedirect 
         : `${baseRedirect}/auth/callback`;
 
-      await loginUseCase.loginWithGoogle(redirectTo);
+      const normalizedNextPath = nextPath.startsWith('/') ? nextPath : `/${nextPath}`;
+      const redirectToWithNext = `${redirectTo}?next=${encodeURIComponent(normalizedNextPath)}`;
+
+      await loginUseCase.loginWithGoogle(redirectToWithNext);
     } catch (err: unknown) {
       console.error("Error signing in with Google:", err);
       setError("Falha ao conectar com o Google. Tente novamente.");

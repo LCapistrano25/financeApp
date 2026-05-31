@@ -32,7 +32,7 @@ export default function LoginPage() {
 
         <div className="w-full flex flex-col justify-center gap-2">
           <button
-            onClick={loginWithGoogle}
+            onClick={() => loginWithGoogle()}
             disabled={isLoading}
             className="flex w-full max-w-[280px] mx-auto h-14 items-center justify-center gap-3 rounded-[20px] bg-[#1e293b] px-2 py-2 text-[15px] font-semibold text-white transition-all hover:bg-[#334155] focus:outline-none focus:ring-2 focus:ring-[#1e293b] focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-md"
           >

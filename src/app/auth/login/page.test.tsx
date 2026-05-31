@@ -8,7 +8,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 jest.mock('@/presentation/hooks/auth/use-auth', () => ({
-  useAuth: () => ({ signInWithGoogle: jest.fn(), isLoading: false }),
+  useAuth: () => ({ loginWithGoogle: jest.fn(), isLoading: false }),
 }));
 
 describe('LoginPage', () => {

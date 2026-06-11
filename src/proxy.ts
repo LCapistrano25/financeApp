@@ -2,6 +2,23 @@ import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+function getPublicOrigin(req: NextRequest) {
+    const authRedirectUrl = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL;
+
+    if (authRedirectUrl) {
+        return new URL(authRedirectUrl).origin;
+    }
+
+    const forwardedProto = req.headers.get("x-forwarded-proto")?.split(",")[0] || req.nextUrl.protocol.replace(":", "");
+    const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host") || req.nextUrl.host;
+
+    return `${forwardedProto}://${forwardedHost}`;
+}
+
+function createPublicRedirect(req: NextRequest, pathname: string) {
+    return NextResponse.redirect(new URL(pathname, getPublicOrigin(req)));
+}
+
 async function proxy(req: NextRequest) {
     const res = NextResponse.next();
     const supabase = createServerClient(
@@ -29,9 +46,7 @@ async function proxy(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user && req.nextUrl.pathname.startsWith('/dashboard')) {
-        const redirectUrl = req.nextUrl.clone();
-        redirectUrl.pathname = '/auth/login';
-        const response = NextResponse.redirect(redirectUrl);
+        const response = createPublicRedirect(req, '/auth/login');
         res.cookies.getAll().forEach((cookie) => {
             response.cookies.set(cookie.name, cookie.value);
         });
@@ -39,9 +54,7 @@ async function proxy(req: NextRequest) {
     }
 
     if (user && req.nextUrl.pathname.startsWith('/auth/login')) {
-        const redirectUrl = req.nextUrl.clone();
-        redirectUrl.pathname = '/dashboard';
-        const response = NextResponse.redirect(redirectUrl);
+        const response = createPublicRedirect(req, '/dashboard');
         // Garante que os cookies sejam passados
         res.cookies.getAll().forEach((cookie) => {
             response.cookies.set(cookie.name, cookie.value);

@@ -2,13 +2,20 @@ import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+function getPublicOrigin(requestUrl: URL) {
+    const authRedirectUrl = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL;
+
+    if (authRedirectUrl) {
+        return new URL(authRedirectUrl).origin;
+    }
+
+    return requestUrl.origin;
+}
+
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
-
-    // Redirecionamento correto para ambientes hospedados (Vercel, etc)
-    // Se estivermos em produção, precisamos garantir que o redirecionamento não vá para localhost
-    const origin = requestUrl.origin;
+    const response = NextResponse.redirect(new URL("/dashboard", getPublicOrigin(requestUrl)));
 
     if (code) {
         const cookieStore = await cookies();
@@ -21,17 +28,16 @@ export async function GET(request: Request) {
                         return cookieStore.getAll();
                     },
                     setAll(cookiesToSet) {
-                            cookiesToSet.forEach(({ name, value, options }) => {
-                                cookieStore.set({ name, value, ...options });
-                            });
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            response.cookies.set({ name, value, ...options });
+                        });
                     },
                 },
             }
         );
+
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    // URL absoluta para evitar problemas com proxies
-    const redirectUrl = new URL('/dashboard', origin);
-    return NextResponse.redirect(redirectUrl);
+    return response;
 }

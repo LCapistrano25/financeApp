@@ -1,0 +1,65 @@
+name: CD Cloud Run
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    branches: ["main"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: cd-cloud-run-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Google Cloud Run
+    if: |
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      )
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_REGION: southamerica-east1
+      CLOUD_RUN_SERVICE: finance-app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Deploy source to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service: ${{ env.CLOUD_RUN_SERVICE }}
+          region: ${{ env.GCP_REGION }}
+          source: .
+          env_vars: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ secrets.NEXT_PUBLIC_AUTH_REDIRECT_URL }}
+            NEXT_TELEMETRY_DISABLED=1
+          flags: >-
+            --allow-unauthenticated
+            --set-build-env-vars=NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }},NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }},NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ secrets.NEXT_PUBLIC_AUTH_REDIRECT_URL }},NEXT_TELEMETRY_DISABLED=1
+
+      - name: Show service URL
+        run: echo "${{ steps.deploy.outputs.url }}"

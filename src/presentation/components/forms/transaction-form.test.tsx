@@ -2,16 +2,26 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TransactionForm } from './transaction-form';
 // IMPORTAMOS OS NOSSOS HOOKS PARA PODER FAZER O MOCK DELES
-import { useCreateTransaction } from '@/presentation/hooks/use-create-transaction';
-import { useEditTransaction } from '@/presentation/hooks/use-edit-transaction';
+import { useCreateTransaction } from '@/presentation/hooks/transaction/create-transaction/use-create-transaction';
+import { useEditTransaction } from '@/presentation/hooks/transaction/edit-transaction/use-edit-transaction';
+import { useCategories } from '@/presentation/hooks/category/get-categories/use-get-categories';
+import { useAccounts } from '@/presentation/hooks/account/get-accounts/use-get-accounts';
 
 // 1. Mockamos os hooks em vez do Supabase
-jest.mock('@/presentation/hooks/use-create-transaction', () => ({
+jest.mock('@/presentation/hooks/transaction/create-transaction/use-create-transaction', () => ({
   useCreateTransaction: jest.fn(),
 }));
 
-jest.mock('@/presentation/hooks/use-edit-transaction', () => ({
+jest.mock('@/presentation/hooks/transaction/edit-transaction/use-edit-transaction', () => ({
   useEditTransaction: jest.fn(),
+}));
+
+jest.mock('@/presentation/hooks/category/get-categories/use-get-categories', () => ({
+  useCategories: jest.fn(),
+}));
+
+jest.mock('@/presentation/hooks/account/get-accounts/use-get-accounts', () => ({
+  useAccounts: jest.fn(),
 }));
 
 describe('TransactionForm', () => {
@@ -38,6 +48,24 @@ describe('TransactionForm', () => {
     (useEditTransaction as jest.Mock).mockReturnValue({
       editTransaction: mockEditTransaction,
       isLoading: false,
+    });
+
+    (useCategories as jest.Mock).mockReturnValue({
+      categories: [
+        { id: 'cat-1', name: 'Salário', icon: '💰', color: '#10b981', type: 'INCOME' },
+      ],
+      isLoading: false,
+      error: null,
+      refresh: jest.fn(),
+    });
+
+    (useAccounts as jest.Mock).mockReturnValue({
+      accounts: [
+        { id: 'acc-1', name: 'Carteira', icon: '👛', color: '#ef4444' },
+      ],
+      isLoading: false,
+      error: null,
+      refresh: jest.fn(),
     });
     
     // Sucesso padrão
@@ -80,6 +108,8 @@ describe('TransactionForm', () => {
 
     fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '1000' } });
     fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'Salary' } });
+    fireEvent.change(screen.getByLabelText(/Categoria/i), { target: { value: 'cat-1' } });
+    fireEvent.change(screen.getByLabelText(/Conta/i), { target: { value: 'acc-1' } });
 
     const submitButton = screen.getByRole('button', { name: /Confirmar Receita/i });
     fireEvent.click(submitButton);
@@ -97,7 +127,9 @@ describe('TransactionForm', () => {
       amount: 500,
       description: 'Rent',
       date: '2023-01-01',
-      is_paid: true,
+      isPaid: true,
+      categoryId: 'cat-1',
+      accountId: 'acc-1',
     };
     render(<TransactionForm {...defaultProps} initialData={initialData} />);
 
@@ -115,6 +147,8 @@ describe('TransactionForm', () => {
 
   it('should show alert when title or amount is missing (create)', () => {
     render(<TransactionForm {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(/Categoria/i), { target: { value: 'cat-1' } });
+    fireEvent.change(screen.getByLabelText(/Conta/i), { target: { value: 'acc-1' } });
     
     // Tentamos enviar sem preencher nada
     const submitButton = screen.getByRole('button', { name: /Confirmar Receita/i });
@@ -131,7 +165,9 @@ describe('TransactionForm', () => {
       amount: 500,
       description: 'Rent',
       date: '2023-01-01',
-      is_paid: true,
+      isPaid: true,
+      categoryId: 'cat-1',
+      accountId: 'acc-1',
     };
     render(<TransactionForm {...defaultProps} initialData={initialData} />);
 
@@ -151,6 +187,8 @@ describe('TransactionForm', () => {
     render(<TransactionForm {...defaultProps} />);
     fireEvent.change(screen.getByLabelText(/Valor da Receita/i), { target: { value: '100' } });
     fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'Error Test' } });
+    fireEvent.change(screen.getByLabelText(/Categoria/i), { target: { value: 'cat-1' } });
+    fireEvent.change(screen.getByLabelText(/Conta/i), { target: { value: 'acc-1' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Confirmar Receita/i }));
 
@@ -169,7 +207,9 @@ describe('TransactionForm', () => {
       amount: 500,
       description: 'Rent',
       date: '2023-01-01',
-      is_paid: true,
+      isPaid: true,
+      categoryId: 'cat-1',
+      accountId: 'acc-1',
     };
     render(<TransactionForm {...defaultProps} initialData={initialData} />);
 

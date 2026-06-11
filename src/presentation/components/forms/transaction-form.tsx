@@ -3,22 +3,24 @@
 import * as React from "react";
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
-import type { Transaction } from "@/domain/entities/transaction";
+import { useCategories } from "@/presentation/hooks/category/get-categories/use-get-categories";
+import { useAccounts } from "@/presentation/hooks/account/get-accounts/use-get-accounts";
 
-// IMPORTAMOS OS NOSSOS HOOKS DE CASO DE USO
-import { useCreateTransaction } from "@/presentation/hooks/use-create-transaction";
-import { useEditTransaction } from "@/presentation/hooks/use-edit-transaction";
+import { useCreateTransaction } from "@/presentation/hooks/transaction/create-transaction/use-create-transaction";
+import { useEditTransaction } from "@/presentation/hooks/transaction/edit-transaction/use-edit-transaction";
 
 type TransactionFormInitialData = {
-  readonly id: Transaction["id"];
-  readonly amount: Transaction["amount"];
-  readonly description?: Transaction["description"];
-  readonly date: Transaction["date"];
-  readonly is_paid: Transaction["is_paid"];
+  readonly id: string;
+  readonly amount: number;
+  readonly description?: string;
+  readonly date: string;
+  readonly isPaid: boolean;
+  readonly categoryId?: string;
+  readonly accountId?: string;
 };
 
 type TransactionFormProps = Readonly<{
-  type: 'INCOME' | 'EXPENSE';
+  type: "INCOME" | "EXPENSE";
   initialData?: TransactionFormInitialData;
   onSuccess: () => void;
 }>;
@@ -26,32 +28,39 @@ type TransactionFormProps = Readonly<{
 export function TransactionForm({ type, initialData, onSuccess }: TransactionFormProps) {
   const isEditing = !!initialData;
 
-  // INICIAMOS OS HOOKS
   const { createTransaction, isLoading: isCreating } = useCreateTransaction();
   const { editTransaction, isLoading: isUpdating } = useEditTransaction();
-  const isSubmitting = isCreating || isUpdating; // Unifica o estado de loading
+  const isSubmitting = isCreating || isUpdating;
 
-  // Estados do formulário
+  const { categories, isLoading: isLoadingCategories } = useCategories();
+  const categoriesForType = categories.filter((c) => String(c.type) === type);
+
+  const { accounts, isLoading: isLoadingAccounts } = useAccounts();
+
   const [amount, setAmount] = useState(initialData?.amount?.toString() || "");
   
-  // Puxamos 'title' se existir, ou o fallback 'description'
   const [title, setTitle] = useState(initialData?.description || "");
   const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0]);
-  const [isPaid, setIsPaid] = useState(initialData?.is_paid ?? true);
+  const [isPaid, setIsPaid] = useState(initialData?.isPaid ?? true);
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? "");
+  const [accountId, setAccountId] = useState(initialData?.accountId ?? "");
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!amount || !title) return alert("Preencha o valor e o título!");
+    if (!categoryId) return alert("Selecione uma categoria.");
+    if (!accountId) return alert("Selecione uma conta.");
 
     try {
-      // Montamos o payload respeitando o contrato da Entidade (Domain)
       const payload = {
-        description: title, // Mantemos para não quebrar seu banco caso ainda não tenha a coluna title
+        description: title,
         amount: Number.parseFloat(amount.replace(',', '.')),
         type: type,
         date: new Date(date).toISOString(),
         is_paid: isPaid,
-        currency: 'BRL', // A entidade exige a moeda
+        currency: 'BRL',
+        category_id: categoryId,
+        account_id: accountId,
       };
 
       if (isEditing && initialData) {
@@ -60,7 +69,7 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
         await createTransaction(payload);
       }
 
-      onSuccess(); // Sucesso! Avisa a página para fechar a gaveta e recarregar a lista.
+      onSuccess();
 
     } catch (error: unknown) {
       console.error(error);
@@ -142,6 +151,56 @@ export function TransactionForm({ type, initialData, onSuccess }: TransactionFor
               </div>
             </button>
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="category" className="text-xs font-bold text-slate-400 ml-1 uppercase">Categoria</label>
+          <select
+            id="category"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            disabled={isLoadingCategories || categoriesForType.length === 0}
+            className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100"
+            required
+          >
+            <option value="" disabled>
+              {isLoadingCategories
+                ? "Carregando..."
+                : categoriesForType.length === 0
+                  ? "Crie uma categoria primeiro"
+                  : "Selecione uma categoria"}
+            </option>
+            {categoriesForType.map((c) => (
+              <option key={c.id} value={c.id}>
+                {`${c.icon ?? "🏷️"} ${c.name}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="account" className="text-xs font-bold text-slate-400 ml-1 uppercase">Conta</label>
+          <select
+            id="account"
+            value={accountId}
+            onChange={(e) => setAccountId(e.target.value)}
+            disabled={isLoadingAccounts || accounts.length === 0}
+            className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-slate-900 dark:text-slate-100"
+            required
+          >
+            <option value="" disabled>
+              {isLoadingAccounts
+                ? "Carregando..."
+                : accounts.length === 0
+                  ? "Crie uma conta primeiro"
+                  : "Selecione uma conta"}
+            </option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {`${a.icon ?? "🏦"} ${a.name}`}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

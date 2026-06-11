@@ -7,7 +7,7 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-jest.mock('@/presentation/hooks/use-auth', () => ({
+jest.mock('@/presentation/hooks/auth/use-auth', () => ({
   useAuth: () => ({ signInWithGoogle: jest.fn(), isLoading: false }),
 }));
 

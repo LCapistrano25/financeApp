@@ -6,9 +6,9 @@ import { SummaryCard } from "@/presentation/components/cards/summary-card";
 import { TransactionCard } from "@/presentation/components/cards/transaction-card";
 import { BottomSheet } from "@/presentation/components/mobile/bottom-sheet";
 import { TransactionForm } from "@/presentation/components/forms/transaction-form";
-import { useTransactions } from "@/presentation/hooks/use-transactions";
-import { useDeleteTransaction } from "@/presentation/hooks/use-delete-transaction"; // <-- NOVO HOOK IMPORTADO
-import type { Transaction } from "@/domain/entities/transaction";
+import { useTransactions } from "@/presentation/hooks/transaction/get-transaction/use-get-transactions";
+import { useDeleteTransaction } from "@/presentation/hooks/transaction/delete-transaction/use-delete-transaction"; // <-- NOVO HOOK IMPORTADO
+import type { Transaction } from "@/domain/entities/transaction/transaction";
 
 function getCurrentMonthYear() {
   const now = new Date();
@@ -26,28 +26,25 @@ export default function DashboardPage() {
   // 2. Hook de exclusão (Limpo e isolado)
   const { deleteTransaction, isLoading: isDeleting } = useDeleteTransaction();
 
-  type TransactionWithCategory = Transaction & { category?: { name: string } | null };
-
   // 3. Estados de Controle das Gavetas
-  const [activeForm, setActiveForm] = useState<'INCOME' | 'EXPENSE' | null>(null);
+  const [activeForm, setActiveForm] = useState<"INCOME" | "EXPENSE" | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithCategory | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Separando rendas e contas
-  const typedTransactions = transactions as TransactionWithCategory[];
-  const incomes = typedTransactions.filter((t) => t.type === "INCOME");
-  const expenses = typedTransactions.filter((t) => t.type === "EXPENSE");
+  const incomes = transactions.filter((t) => t.isIncome());
+  const expenses = transactions.filter((t) => t.isExpense());
 
   // --- FUNÇÕES DE AÇÃO ---
 
-  const handleTransactionClick = (transaction: TransactionWithCategory) => {
+  const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsDetailOpen(true);
   };
 
   const handleOpenEdit = () => {
     if (!selectedTransaction) return;
-    setActiveForm(selectedTransaction.type);
+    setActiveForm(selectedTransaction.isIncome() ? "INCOME" : "EXPENSE");
     setIsDetailOpen(false);
   }
 
@@ -57,7 +54,7 @@ export default function DashboardPage() {
 
     // O hook de delete já tem o confirm nativo (ou você pode manter o seu aqui)
     try {
-      const success = await deleteTransaction(selectedTransaction.id);
+      const success = await deleteTransaction(selectedTransaction.id!);
 
       if (success) {
         setIsDetailOpen(false); // Fecha a gaveta
@@ -66,6 +63,12 @@ export default function DashboardPage() {
     } catch {
       alert("Erro ao excluir!"); // O erro real já foi tratado pelo hook
     }
+  };
+
+  const getTransactionSubtitle = (transaction: Transaction) => {
+    const categoryLabel = transaction.categoryName ?? "Sem categoria";
+    const accountLabel = transaction.accountName;
+    return accountLabel ? `${categoryLabel} • ${accountLabel}` : categoryLabel;
   };
 
   let formTitle = "Nova Transação";
@@ -122,13 +125,13 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-2 gap-3 mb-8">
               <button
-                onClick={() => { setActiveForm('INCOME'); setSelectedTransaction(null); }}
+                onClick={() => { setActiveForm("INCOME"); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm font-bold text-xl"
               >
                 <Plus className="w-6 h-6" />
               </button>
               <button
-                onClick={() => { setActiveForm('EXPENSE'); setSelectedTransaction(null); }}
+                onClick={() => { setActiveForm("EXPENSE"); setSelectedTransaction(null); }}
                 className="flex h-12 items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors shadow-sm font-bold text-xl"
               >
                 <Minus className="w-6 h-6" />
@@ -143,7 +146,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.description || "Renda"}
-                      category={item.category?.name || "Sem categoria"}
+                      category={getTransactionSubtitle(item)}
                       amount={item.amount}
                       type="income"
                       onClick={() => handleTransactionClick(item)}
@@ -161,7 +164,7 @@ export default function DashboardPage() {
                     <TransactionCard
                       key={item.id}
                       title={item.description || "Conta"}
-                      category={item.category?.name || "Sem categoria"}
+                      category={getTransactionSubtitle(item)}
                       amount={item.amount}
                       type="expense"
                       onClick={() => handleTransactionClick(item)}
@@ -184,7 +187,15 @@ export default function DashboardPage() {
         {activeForm && (
           <TransactionForm
             type={activeForm}
-            initialData={selectedTransaction ?? undefined}
+            initialData={selectedTransaction ? {
+              id: selectedTransaction.id!,
+              amount: selectedTransaction.amount,
+              description: selectedTransaction.description,
+              date: selectedTransaction.date,
+              isPaid: selectedTransaction.isPaid,
+              categoryId: selectedTransaction.categoryId,
+              accountId: selectedTransaction.accountId
+            } : undefined}
             onSuccess={() => {
               setActiveForm(null);
               setSelectedTransaction(null);

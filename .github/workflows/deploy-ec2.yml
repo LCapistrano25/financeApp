@@ -51,6 +51,7 @@ jobs:
             --exclude='node_modules' \
             --exclude='.env' \
             --exclude='.env.*' \
+            --exclude='finance-app.tar.gz' \
             -czf finance-app.tar.gz .
 
       - name: Create production env file

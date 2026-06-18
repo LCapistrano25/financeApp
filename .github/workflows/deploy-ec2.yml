@@ -1,0 +1,82 @@
+name: CD EC2
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    branches: ["main"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: cd-ec2-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    if: |
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      )
+    runs-on: ubuntu-latest
+
+    env:
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_APP_PATH: ${{ secrets.EC2_APP_PATH || '/opt/finance-app' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_deploy_key
+          chmod 600 ~/.ssh/ec2_deploy_key
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+      - name: Package application
+        run: |
+          tar \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.next' \
+            --exclude='coverage' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            -czf finance-app.tar.gz .
+
+      - name: Create production env file
+        run: |
+          cat > finance-app.env <<EOF
+          APP_PORT=3000
+          KUMA_PORT=3001
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ secrets.NEXT_PUBLIC_AUTH_REDIRECT_URL }}
+          EOF
+
+      - name: Upload package to EC2
+        run: |
+          ssh -i ~/.ssh/ec2_deploy_key "$EC2_USER@$EC2_HOST" "mkdir -p '$EC2_APP_PATH'"
+          scp -i ~/.ssh/ec2_deploy_key finance-app.tar.gz "$EC2_USER@$EC2_HOST:/tmp/finance-app.tar.gz"
+          scp -i ~/.ssh/ec2_deploy_key finance-app.env "$EC2_USER@$EC2_HOST:/tmp/finance-app.env"
+
+      - name: Deploy with Docker Compose
+        run: |
+          ssh -i ~/.ssh/ec2_deploy_key "$EC2_USER@$EC2_HOST" "
+            set -e
+            cd '$EC2_APP_PATH'
+            tar -xzf /tmp/finance-app.tar.gz -C '$EC2_APP_PATH'
+            mv /tmp/finance-app.env .env
+            docker compose up -d --build
+            docker image prune -f
+          "

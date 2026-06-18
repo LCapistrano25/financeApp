@@ -124,3 +124,55 @@ npm run sonar
 
 ```
 
+---
+
+## Deploy com Docker na EC2
+
+O projeto possui um `Dockerfile` multi-stage para gerar a imagem de producao do Next.js e um `docker-compose.yml` com dois servicos:
+
+- `finance-app`: aplicacao Next.js na porta `3000`.
+- `uptime-kuma`: painel de monitoramento na porta `3001`.
+
+O Uptime Kuma fica em um container separado. Esse modelo facilita atualizar, reiniciar e persistir os dados do monitoramento sem misturar processos dentro da imagem da aplicacao.
+
+### 1. Configure as variaveis
+
+```bash
+cp .env.production.example .env
+```
+
+Edite o `.env` com os dados reais do Supabase e com a URL publica da aplicacao:
+
+```env
+APP_PORT=3000
+KUMA_PORT=3001
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_AUTH_REDIRECT_URL=http://SEU_IP_OU_DOMINIO:3000/auth/callback
+```
+
+As variaveis `NEXT_PUBLIC_*` sao embutidas no bundle do Next.js durante o build. Sempre que elas mudarem, execute o build novamente.
+
+### 2. Suba os containers
+
+```bash
+docker compose up -d --build
+```
+
+Acesse:
+
+- App: `http://SEU_IP_OU_DOMINIO:3000`
+- Uptime Kuma: `http://SEU_IP_OU_DOMINIO:3001`
+
+No Kuma, crie um monitor HTTP apontando para `http://finance-app:3000` ou para a URL publica da aplicacao.
+
+### 3. Comandos uteis
+
+```bash
+docker compose logs -f finance-app
+docker compose ps
+docker compose pull
+docker compose up -d --build
+```
+

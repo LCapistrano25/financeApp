@@ -15,6 +15,8 @@ const customJestConfig = {
     '!src/**/*.d.ts',
     '!src/**/*.test.{js,jsx,ts,tsx}'
   ],
+  modulePathIgnorePatterns: ['<rootDir>/.next/'],
+  watchPathIgnorePatterns: ['<rootDir>/.next/'],
 }
 
 export default createJestConfig(customJestConfig)

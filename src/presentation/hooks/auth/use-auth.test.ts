@@ -1,16 +1,15 @@
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { useAuth } from './use-auth';
-import { supabase } from '@/infrastructure/repositories/supabase/supabase.client';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/infrastructure/repositories/supabase/supabase.client';
+import { useAuth } from './use-auth';
 
 jest.mock('@/infrastructure/repositories/supabase/supabase.client', () => ({
   supabase: {
     auth: {
       getSession: jest.fn().mockResolvedValue({
-        data: { session: { user: { id: 'user-1' } } },  // Add the session structure
+        data: { session: { user: { id: 'user-1' } } },
       }),
-      signOut: jest.fn().mockResolvedValue({}),  // Ensure signOut returns proper structure
-      signInWithOAuth: jest.fn().mockResolvedValue({}),
+      signOut: jest.fn().mockResolvedValue({}),
       onAuthStateChange: jest.fn((callback) => {
         callback(null, { user: { id: 'user-1' } });
         return { data: { subscription: { unsubscribe: jest.fn() } } };
@@ -67,18 +66,13 @@ describe('useAuth', () => {
     expect(mockPush).toHaveBeenCalledWith('/auth/login');
   });
 
-  it('should call loginWithGoogle correctly', async () => {
+  it('should start Google login through the server route', async () => {
     const { result } = renderHook(() => useAuth());
 
     await act(async () => {
       await result.current.loginWithGoogle();
     });
 
-    expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
-      provider: 'google',
-      options: expect.objectContaining({
-        redirectTo: expect.stringContaining('/auth/callback'),
-      }),
-    });
+    expect(mockPush).toHaveBeenCalledWith('/auth/google');
   });
 });

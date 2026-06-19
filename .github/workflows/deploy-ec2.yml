@@ -29,18 +29,45 @@ jobs:
       EC2_HOST: ${{ secrets.EC2_HOST }}
       EC2_APP_PATH: ${{ secrets.EC2_APP_PATH || '/opt/finance-app' }}
       IMAGE_NAME: finance-app:latest
+      SSH_OPTS: -i $HOME/.ssh/ec2_deploy_key -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 -o ServerAliveCountMax=5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Configure SSH
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
+          set -euo pipefail
+
+          if [ -z "${EC2_HOST:-}" ]; then
+            echo "EC2_HOST secret is empty."
+            exit 1
+          fi
+
+          if [ -z "${EC2_USER:-}" ]; then
+            echo "EC2_USER secret is empty."
+            exit 1
+          fi
+
+          if [ -z "${EC2_SSH_KEY:-}" ]; then
+            echo "EC2_SSH_KEY secret is empty."
+            exit 1
+          fi
+
+          EC2_HOST="$(printf '%s' "$EC2_HOST" | tr -d '[:space:]' | sed -E 's#^ssh://##; s#^https?://##; s#^[^@]+@##; s#/.*$##; s#:22$##')"
+          echo "Using EC2 host: $EC2_HOST"
+
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_deploy_key
+          printf '%s\n' "$EC2_SSH_KEY" | tr -d '\r' > ~/.ssh/ec2_deploy_key
           chmod 600 ~/.ssh/ec2_deploy_key
-          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+          ssh-keygen -y -f ~/.ssh/ec2_deploy_key > /dev/null
+
+          {
+            echo "EC2_HOST=$EC2_HOST"
+          } >> "$GITHUB_ENV"
 
       - name: Build Docker image
         run: |
@@ -68,15 +95,15 @@ jobs:
 
       - name: Upload package to EC2
         run: |
-          ssh -i ~/.ssh/ec2_deploy_key "$EC2_USER@$EC2_HOST" "mkdir -p '$EC2_APP_PATH'"
-          scp -i ~/.ssh/ec2_deploy_key "$RUNNER_TEMP/finance-app.env" "$EC2_USER@$EC2_HOST:/tmp/finance-app.env"
-          scp -i ~/.ssh/ec2_deploy_key "$RUNNER_TEMP/finance-app-image.tar.gz" "$EC2_USER@$EC2_HOST:/tmp/finance-app-image.tar.gz"
-          scp -i ~/.ssh/ec2_deploy_key docker-compose.ec2.yml "$EC2_USER@$EC2_HOST:$EC2_APP_PATH/docker-compose.yml"
+          ssh $SSH_OPTS "$EC2_USER@$EC2_HOST" "mkdir -p '$EC2_APP_PATH'"
+          scp $SSH_OPTS "$RUNNER_TEMP/finance-app.env" "$EC2_USER@$EC2_HOST:/tmp/finance-app.env"
+          scp $SSH_OPTS "$RUNNER_TEMP/finance-app-image.tar.gz" "$EC2_USER@$EC2_HOST:/tmp/finance-app-image.tar.gz"
+          scp $SSH_OPTS docker-compose.ec2.yml "$EC2_USER@$EC2_HOST:$EC2_APP_PATH/docker-compose.yml"
 
       - name: Deploy with Docker Compose
         timeout-minutes: 10
         run: |
-          ssh -i ~/.ssh/ec2_deploy_key "$EC2_USER@$EC2_HOST" "
+          ssh $SSH_OPTS "$EC2_USER@$EC2_HOST" "
             set -e
             cd '$EC2_APP_PATH'
             mv /tmp/finance-app.env .env

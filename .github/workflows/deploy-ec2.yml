@@ -29,7 +29,8 @@ jobs:
       EC2_HOST: ${{ secrets.EC2_HOST }}
       EC2_APP_PATH: ${{ secrets.EC2_APP_PATH || '/opt/finance-app' }}
       IMAGE_NAME: finance-app:latest
-      SSH_OPTS: -i $HOME/.ssh/ec2_deploy_key -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 -o ServerAliveCountMax=5
+      SSH_KEY_PATH: /home/runner/.ssh/ec2_deploy_key
+      SSH_OPTS: -i /home/runner/.ssh/ec2_deploy_key -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 -o ServerAliveCountMax=5
 
     steps:
       - name: Checkout repository
@@ -61,9 +62,9 @@ jobs:
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "$EC2_SSH_KEY" | tr -d '\r' > ~/.ssh/ec2_deploy_key
-          chmod 600 ~/.ssh/ec2_deploy_key
-          ssh-keygen -y -f ~/.ssh/ec2_deploy_key > /dev/null
+          printf '%s\n' "$EC2_SSH_KEY" | tr -d '\r' > "$SSH_KEY_PATH"
+          chmod 600 "$SSH_KEY_PATH"
+          ssh-keygen -y -f "$SSH_KEY_PATH" > /dev/null
 
           {
             echo "EC2_HOST=$EC2_HOST"

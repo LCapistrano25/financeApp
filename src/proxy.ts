@@ -19,11 +19,27 @@ function createPublicRedirect(req: NextRequest, pathname: string) {
     return NextResponse.redirect(new URL(pathname, getPublicOrigin(req)));
 }
 
+function getSupabaseConfig() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || supabaseUrl === "https://placeholder.supabase.co") {
+        throw new Error("NEXT_PUBLIC_SUPABASE_URL must be configured with the real Supabase project URL.");
+    }
+
+    if (!supabaseAnonKey || supabaseAnonKey === "placeholder") {
+        throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY must be configured with the real Supabase anon key.");
+    }
+
+    return { supabaseUrl, supabaseAnonKey };
+}
+
 async function proxy(req: NextRequest) {
     const res = NextResponse.next();
+    const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder",
+        supabaseUrl,
+        supabaseAnonKey,
         {
             cookies: {
                 getAll() {

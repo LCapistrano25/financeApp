@@ -89,6 +89,16 @@ jobs:
             fi
           done
 
+          if [ "$EC2_NEXT_PUBLIC_SUPABASE_URL" = "https://placeholder.supabase.co" ]; then
+            echo "EC2_NEXT_PUBLIC_SUPABASE_URL must be the real Supabase project URL."
+            exit 1
+          fi
+
+          if [ "$EC2_NEXT_PUBLIC_SUPABASE_ANON_KEY" = "placeholder" ]; then
+            echo "EC2_NEXT_PUBLIC_SUPABASE_ANON_KEY must be the real Supabase anon key."
+            exit 1
+          fi
+
       - name: Build Docker image
         run: |
           docker build \

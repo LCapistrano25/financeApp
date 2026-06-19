@@ -12,6 +12,21 @@ function getPublicOrigin(requestUrl: URL) {
     return requestUrl.origin;
 }
 
+function getSupabaseConfig() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || supabaseUrl === "https://placeholder.supabase.co") {
+        throw new Error("NEXT_PUBLIC_SUPABASE_URL must be configured with the real Supabase project URL.");
+    }
+
+    if (!supabaseAnonKey || supabaseAnonKey === "placeholder") {
+        throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY must be configured with the real Supabase anon key.");
+    }
+
+    return { supabaseUrl, supabaseAnonKey };
+}
+
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
@@ -19,9 +34,10 @@ export async function GET(request: Request) {
 
     if (code) {
         const cookieStore = await cookies();
+        const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
         const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder",
+            supabaseUrl,
+            supabaseAnonKey,
             {
                 cookies: {
                     getAll() {

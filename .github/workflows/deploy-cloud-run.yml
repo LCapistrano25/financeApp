@@ -63,6 +63,16 @@ jobs:
             fi
           done
 
+          if [ "$CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL" = "https://placeholder.supabase.co" ]; then
+            echo "CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL must be the real Supabase project URL."
+            exit 1
+          fi
+
+          if [ "$CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY" = "placeholder" ]; then
+            echo "CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY must be the real Supabase anon key."
+            exit 1
+          fi
+
       - name: Deploy source to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v3

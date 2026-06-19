@@ -28,6 +28,7 @@ jobs:
       EC2_USER: ${{ secrets.EC2_USER }}
       EC2_HOST: ${{ secrets.EC2_HOST }}
       EC2_APP_PATH: ${{ secrets.EC2_APP_PATH || '/opt/finance-app' }}
+      IMAGE_NAME: finance-app:latest
 
     steps:
       - name: Checkout repository
@@ -41,17 +42,18 @@ jobs:
           chmod 600 ~/.ssh/ec2_deploy_key
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
-      - name: Package application
+      - name: Build Docker image
         run: |
-          tar \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.next' \
-            --exclude='coverage' \
-            --exclude='node_modules' \
-            --exclude='.env' \
-            --exclude='.env.*' \
-            -czf "$RUNNER_TEMP/finance-app.tar.gz" .
+          docker build \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL='${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}' \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY='${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}' \
+            --build-arg NEXT_PUBLIC_API_URL='${{ secrets.NEXT_PUBLIC_API_URL }}' \
+            --build-arg NEXT_PUBLIC_AUTH_REDIRECT_URL='${{ secrets.NEXT_PUBLIC_AUTH_REDIRECT_URL }}' \
+            -t "$IMAGE_NAME" .
+
+      - name: Package Docker image
+        run: |
+          docker save "$IMAGE_NAME" | gzip > "$RUNNER_TEMP/finance-app-image.tar.gz"
 
       - name: Create production env file
         run: |
@@ -67,16 +69,19 @@ jobs:
       - name: Upload package to EC2
         run: |
           ssh -i ~/.ssh/ec2_deploy_key "$EC2_USER@$EC2_HOST" "mkdir -p '$EC2_APP_PATH'"
-          scp -i ~/.ssh/ec2_deploy_key "$RUNNER_TEMP/finance-app.tar.gz" "$EC2_USER@$EC2_HOST:/tmp/finance-app.tar.gz"
           scp -i ~/.ssh/ec2_deploy_key "$RUNNER_TEMP/finance-app.env" "$EC2_USER@$EC2_HOST:/tmp/finance-app.env"
+          scp -i ~/.ssh/ec2_deploy_key "$RUNNER_TEMP/finance-app-image.tar.gz" "$EC2_USER@$EC2_HOST:/tmp/finance-app-image.tar.gz"
+          scp -i ~/.ssh/ec2_deploy_key docker-compose.ec2.yml "$EC2_USER@$EC2_HOST:$EC2_APP_PATH/docker-compose.yml"
 
       - name: Deploy with Docker Compose
+        timeout-minutes: 10
         run: |
           ssh -i ~/.ssh/ec2_deploy_key "$EC2_USER@$EC2_HOST" "
             set -e
             cd '$EC2_APP_PATH'
-            tar -xzf /tmp/finance-app.tar.gz -C '$EC2_APP_PATH'
             mv /tmp/finance-app.env .env
-            docker compose up -d --build
+            docker load -i /tmp/finance-app-image.tar.gz
+            docker compose up -d --no-build
             docker image prune -f
+            rm -f /tmp/finance-app-image.tar.gz
           "

@@ -26,6 +26,8 @@ describe("GET /auth/callback", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.NEXT_PUBLIC_SUPABASE_URL = "https://finance-app.supabase.co";
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
         delete process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL;
 
         (NextResponse.redirect as jest.Mock).mockReturnValue(response);

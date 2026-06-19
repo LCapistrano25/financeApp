@@ -51,12 +51,11 @@ jobs:
             --exclude='node_modules' \
             --exclude='.env' \
             --exclude='.env.*' \
-            --exclude='finance-app.tar.gz' \
-            -czf finance-app.tar.gz .
+            -czf "$RUNNER_TEMP/finance-app.tar.gz" .
 
       - name: Create production env file
         run: |
-          cat > finance-app.env <<EOF
+          cat > "$RUNNER_TEMP/finance-app.env" <<EOF
           APP_PORT=3000
           KUMA_PORT=3001
           NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -68,8 +67,8 @@ jobs:
       - name: Upload package to EC2
         run: |
           ssh -i ~/.ssh/ec2_deploy_key "$EC2_USER@$EC2_HOST" "mkdir -p '$EC2_APP_PATH'"
-          scp -i ~/.ssh/ec2_deploy_key finance-app.tar.gz "$EC2_USER@$EC2_HOST:/tmp/finance-app.tar.gz"
-          scp -i ~/.ssh/ec2_deploy_key finance-app.env "$EC2_USER@$EC2_HOST:/tmp/finance-app.env"
+          scp -i ~/.ssh/ec2_deploy_key "$RUNNER_TEMP/finance-app.tar.gz" "$EC2_USER@$EC2_HOST:/tmp/finance-app.tar.gz"
+          scp -i ~/.ssh/ec2_deploy_key "$RUNNER_TEMP/finance-app.env" "$EC2_USER@$EC2_HOST:/tmp/finance-app.env"
 
       - name: Deploy with Docker Compose
         run: |

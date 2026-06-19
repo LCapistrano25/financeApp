@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/presentation/hooks/auth/use-auth";
+import { useState } from "react";
 
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -12,13 +12,16 @@ const GoogleIcon = () => (
 );
 
 export default function LoginPage() {
-  // Importamos a função e os estados do nosso hook limpo
-  const { loginWithGoogle, isLoading, error } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loginWithGoogle = () => {
+    setIsLoading(true);
+    window.location.assign("/auth/google");
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#f8f9fa] px-4">
       <div className="flex flex-1 flex-col items-center justify-center w-full max-w-[320px] space-y-10">
-
         <div className="flex flex-col items-center text-center space-y-4">
           <h1 className="text-[40px] font-extrabold text-[#0f172a] tracking-tight">
             Finance
@@ -26,7 +29,7 @@ export default function LoginPage() {
           <p className="text-[#64748b] text-[15px] leading-relaxed">
             Organize suas contas sem
             <br />
-            complicação e em segundos.
+            complicacao e em segundos.
           </p>
         </div>
 
@@ -45,15 +48,12 @@ export default function LoginPage() {
             )}
             Entrar com Google
           </button>
-          
-          {/* Mostra mensagem de erro se a autenticação falhar */}
-          {error && <p className="text-red-500 text-sm text-center font-medium mt-2">{error}</p>}
         </div>
       </div>
 
       <div className="pb-8">
         <p className="text-[13px] text-[#94a3b8] text-center">
-          Seus dados são armazenados de forma segura na nuvem.
+          Seus dados sao armazenados de forma segura na nuvem.
         </p>
       </div>
     </div>

@@ -32,6 +32,7 @@ jobs:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_REGION: southamerica-east1
       CLOUD_RUN_SERVICE: finance-app
+      ARTIFACT_REGISTRY_REPOSITORY: cloud-run-source-deploy
       CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL }}
       CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       CLOUD_RUN_NEXT_PUBLIC_API_URL: ${{ secrets.CLOUD_RUN_NEXT_PUBLIC_API_URL }}
@@ -47,6 +48,9 @@ jobs:
           project_id: ${{ env.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Validate Cloud Run app secrets
         run: |
@@ -73,14 +77,45 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy source to Cloud Run
+      - name: Ensure Artifact Registry repository
+        run: |
+          set -euo pipefail
+
+          gcloud artifacts repositories describe "$ARTIFACT_REGISTRY_REPOSITORY" \
+            --location "$GCP_REGION" >/dev/null 2>&1 \
+            || gcloud artifacts repositories create "$ARTIFACT_REGISTRY_REPOSITORY" \
+              --repository-format docker \
+              --location "$GCP_REGION" \
+              --description "Cloud Run deployment images"
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
+
+      - name: Build Docker image
+        run: |
+          set -euo pipefail
+
+          image="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${ARTIFACT_REGISTRY_REPOSITORY}/${CLOUD_RUN_SERVICE}:${GITHUB_SHA}"
+          echo "CLOUD_RUN_IMAGE=$image" >> "$GITHUB_ENV"
+
+          docker build \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="$CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL" \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+            --build-arg NEXT_PUBLIC_API_URL="${CLOUD_RUN_NEXT_PUBLIC_API_URL:-http://localhost:8000}" \
+            --build-arg NEXT_PUBLIC_AUTH_REDIRECT_URL="$CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL" \
+            -t "$image" .
+
+      - name: Push Docker image
+        run: docker push "$CLOUD_RUN_IMAGE"
+
+      - name: Deploy image to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v3
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
           service: ${{ env.CLOUD_RUN_SERVICE }}
           region: ${{ env.GCP_REGION }}
-          source: .
+          image: ${{ env.CLOUD_RUN_IMAGE }}
           env_vars: |
             NEXT_PUBLIC_SUPABASE_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
@@ -88,9 +123,7 @@ jobs:
             NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL }}
             NEXT_TELEMETRY_DISABLED=1
           flags: >-
-            --clear-base-image
             --allow-unauthenticated
-            --set-build-env-vars=NEXT_PUBLIC_SUPABASE_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL }},NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY }},NEXT_PUBLIC_API_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_API_URL }},NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL }},NEXT_TELEMETRY_DISABLED=1
 
       - name: Show service URL
         run: echo "${{ steps.deploy.outputs.url }}"

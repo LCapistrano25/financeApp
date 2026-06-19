@@ -32,6 +32,10 @@ jobs:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_REGION: southamerica-east1
       CLOUD_RUN_SERVICE: finance-app
+      CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL }}
+      CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      CLOUD_RUN_NEXT_PUBLIC_API_URL: ${{ secrets.CLOUD_RUN_NEXT_PUBLIC_API_URL }}
+      CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL: ${{ secrets.CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL }}
 
     steps:
       - name: Checkout repository
@@ -44,6 +48,21 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
+      - name: Validate Cloud Run app secrets
+        run: |
+          set -euo pipefail
+
+          for name in \
+            CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL \
+            CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY \
+            CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL
+          do
+            if [ -z "${!name:-}" ]; then
+              echo "$name secret is empty."
+              exit 1
+            fi
+          done
+
       - name: Deploy source to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v3
@@ -53,14 +72,15 @@ jobs:
           region: ${{ env.GCP_REGION }}
           source: .
           env_vars: |
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-            NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ secrets.NEXT_PUBLIC_AUTH_REDIRECT_URL }}
+            NEXT_PUBLIC_SUPABASE_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_API_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL }}
             NEXT_TELEMETRY_DISABLED=1
           flags: >-
             --clear-base-image
             --allow-unauthenticated
-            --set-build-env-vars=NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }},NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }},NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ secrets.NEXT_PUBLIC_AUTH_REDIRECT_URL }},NEXT_TELEMETRY_DISABLED=1
+            --set-build-env-vars=NEXT_PUBLIC_SUPABASE_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_URL }},NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ env.CLOUD_RUN_NEXT_PUBLIC_SUPABASE_ANON_KEY }},NEXT_PUBLIC_API_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_API_URL }},NEXT_PUBLIC_AUTH_REDIRECT_URL=${{ env.CLOUD_RUN_NEXT_PUBLIC_AUTH_REDIRECT_URL }},NEXT_TELEMETRY_DISABLED=1
 
       - name: Show service URL
         run: echo "${{ steps.deploy.outputs.url }}"

@@ -27,23 +27,6 @@ services:
     networks:
       - finance-net
 
-  uptime-kuma:
-    image: louislam/uptime-kuma:1
-    container_name: uptime-kuma
-    restart: unless-stopped
-    ports:
-      - "${KUMA_PORT:-3001}:3001"
-    volumes:
-      - uptime-kuma-data:/app/data
-    depends_on:
-      finance-app:
-        condition: service_healthy
-    networks:
-      - finance-net
-
 networks:
   finance-net:
     driver: bridge
-
-volumes:
-  uptime-kuma-data:

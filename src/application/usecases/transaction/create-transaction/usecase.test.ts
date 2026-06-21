@@ -9,6 +9,7 @@ import { Category } from '@/domain/entities/category/category';
 import { CategoryType } from '@/domain/enum/category-types';
 import { IAccountRepository } from '@/domain/repositories/IAccountRepository';
 import { Account } from '@/domain/entities/account/account';
+import { RepeatFrequency } from '@/domain/enum/repeat-frequency';
 
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
@@ -273,5 +274,63 @@ describe('CreateTransactionUseCase', () => {
       "A categoria selecionada não é compatível com o tipo da transação."
     );
     expect(mockRepository.createTransaction).not.toHaveBeenCalled();
+  });
+
+  it('deve gerar e salvar transações recorrentes quando repeat for true', async () => {
+    const mockUser = { id: 'user-123' };
+    mockAuthService.getAuthenticatedUser.mockResolvedValue(mockUser);
+
+    const payload: CreateTransactionDto = {
+      amount: 150,
+      currency: 'BRL',
+      type: 'EXPENSE',
+      date: '2023-10-11',
+      is_paid: true,
+      description: 'Assinatura',
+      category_id: 'cat-1',
+      account_id: 'acc-1',
+      repeat: true,
+      repeat_frequency: RepeatFrequency.MONTHS,
+      repeat_times: 2,
+    };
+
+    mockCategoryRepository.getCategoryById.mockResolvedValue(
+      Category.restore({
+        id: 'cat-1',
+        user_id: mockUser.id,
+        name: 'Lazer',
+        icon: '🍿',
+        color: '#ef4444',
+        type: CategoryType.EXPENSE,
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    mockAccountRepository.getAccountById.mockResolvedValue(
+      Account.restore({
+        id: 'acc-1',
+        user_id: mockUser.id,
+        name: 'Carteira',
+        icon: '👛',
+        color: '#ef4444',
+        created_at: new Date().toISOString(),
+      })
+    );
+
+    const mockTransaction = Transaction.create({ ...payload, type: TransactionType.EXPENSE, user_id: 'user-123' });
+    mockRepository.createTransaction.mockResolvedValue(mockTransaction);
+
+    await useCase.execute(payload);
+
+    // 1 transação original + 2 repetições = 3 chamadas totais ao repositório
+    expect(mockRepository.createTransaction).toHaveBeenCalledTimes(3);
+    
+    // Verifica se a primeira chamada foi a transação original (neste caso, repeat e isPaid devem ser verdadeiros)
+    expect(mockRepository.createTransaction.mock.calls[0][0].repeat).toBe(true);
+    expect(mockRepository.createTransaction.mock.calls[0][0].isPaid).toBe(true);
+
+    // Verifica se a segunda chamada foi uma filha gerada pelo Domain Service
+    expect(mockRepository.createTransaction.mock.calls[1][0].repeat).toBe(false); // Herdeira não repete
+    expect(mockRepository.createTransaction.mock.calls[1][0].isPaid).toBe(false); // Herdeira nasce não paga
   });
 });

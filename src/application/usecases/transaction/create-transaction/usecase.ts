@@ -6,6 +6,7 @@ import { IAuthService } from '@/application/ports/iauth.service';
 import { ICategoryRepository } from '@/domain/repositories/ICategoryRepository';
 import { IAccountRepository } from '@/domain/repositories/IAccountRepository';
 import { TransactionType } from '@/domain/enum/transaction-type';
+import { TransactionRecurrenceService } from '@/domain/services/transaction-recurrence.service';
 
 export class CreateTransactionUseCase implements ICreateTransactionUseCase {
   constructor(
@@ -52,7 +53,19 @@ export class CreateTransactionUseCase implements ICreateTransactionUseCase {
       user_id: user.id,
     });
 
+    // Salva a transação original
     const newTransaction = await this.repository.createTransaction(transaction);
+
+    // Se houver recorrência, gera as parcelas futuras e salva em lote
+    if (transaction.repeat) {
+      const recurrences = TransactionRecurrenceService.generateRecurrences(transaction);
+      
+      const savePromises = recurrences.map(recurrence =>
+        this.repository.createTransaction(recurrence)
+      );
+      
+      await Promise.all(savePromises);
+    }
 
     return newTransaction;
   }

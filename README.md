@@ -31,7 +31,6 @@ Finance V2 é a evolução da aplicação de gestão financeira pessoal, agora r
 
 **Backend & Inteligência**
 - **Supabase:** PostgreSQL (Banco de dados) e Autenticação.
-- **FastAPI (Python):** Engine de processamento de dados e Machine Learning.
 
 **Qualidade & CI/CD**
 - **Jest & React Testing Library:** Testes unitários e de integração garantindo a confiabilidade dos *Handlers* e Componentes.
@@ -60,7 +59,6 @@ src/
 ### Pré-requisitos
 
 1. Node.js (v18+ recomendado).
-2. Ambiente Python 3.10+ (para o motor de IA).
 3. Projeto configurado no Supabase.
 
 ### Instalação e Execução

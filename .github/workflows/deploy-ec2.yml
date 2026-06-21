@@ -3,7 +3,7 @@ name: CD EC2
 on:
   workflow_run:
     workflows: ["CI Pipeline"]
-    branches: ["main"]
+    branches: ["developer"]
     types: [completed]
   workflow_dispatch:
 
@@ -15,11 +15,11 @@ jobs:
   deploy:
     name: Deploy to EC2
     if: |
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/developer') ||
       (
         github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.event == 'push' &&
-        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_branch == 'developer' &&
         github.event.workflow_run.head_repository.full_name == github.repository
       )
     runs-on: ubuntu-latest

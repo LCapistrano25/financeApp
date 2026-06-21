@@ -5,38 +5,38 @@
   7° Periodo | Engenharia de Software | Unicatólica-TO
 </p>
 
-Finance V2 é a evolução da aplicação de gestão financeira pessoal, agora reconstruída com uma stack moderna, escalável e focada na qualidade de software. Projetado com foco total em usabilidade mobile (Thumb-First), o app combina a agilidade do Next.js com o poder de processamento do Python e a robustez do Supabase.
+Finance V2 é a evolução da aplicação de gestão financeira pessoal, agora reconstruída com uma stack moderna, escalável e focada na qualidade de software. Projetado com foco total em usabilidade mobile (Thumb-First), o app combina a agilidade do Next.js com a robustez do Supabase.
 
-**A Evolução:** Saímos de uma arquitetura legada para um ecossistema completo guiado por **Clean Architecture**, **Domain-Driven Design (DDD)** e **CQRS**, garantindo um código altamente testável e desacoplado de serviços externos.
+**A Evolução:** Saímos de uma arquitetura legada para um ecossistema completo guiado por **Clean Architecture** e **Domain-Driven Design (DDD)**, garantindo um código mais testável e desacoplado de serviços externos.
 
 ---
 
 ## Principais Funcionalidades
 
-*  **Mobile First & PWA:** Experiência de app nativo direto no navegador, com navegação inferior e *Bottom Sheets* para fácil uso com uma mão.
-*  **Modo Escuro:** Interface adaptativa com persistência de tema via Tailwind CSS.
-*  **Inteligência Financeira:** Motor em Python para categorização automática de transações e análise de tendências.
-*  **Gerenciamento Inteligente:** Controle de despesas fixas e parcelamentos (ex: 1/12, 2/12) com projeção mensal.
-*  **Autenticação Segura:** Login centralizado via Supabase Auth (Suporte a Google OAuth e E-mail/Senha).
-*  **Arquitetura Limpa:** Regras de negócio totalmente isoladas da interface gráfica e do banco de dados, facilitando manutenção e testes.
+*  **Mobile First:** experiência otimizada para uso em telas pequenas, com navegação inferior e *Bottom Sheets* para uso com uma mão.
+*  **Modo Escuro:** interface adaptativa com persistência de tema via Tailwind CSS.
+*  **Gerenciamento Financeiro:** controle de despesas fixas, parcelamentos e visualização de receitas e despesas.
+*  **Autenticação Segura:** login centralizado via Supabase Auth (suporte a Google OAuth).
+*  **Arquitetura Limpa:** regras de negócio isoladas da interface gráfica e do banco de dados, facilitando manutenção e testes.
 
 ---
 
 ## Tecnologias Utilizadas
 
 **Frontend & UI**
-- **Next.js 16 (App Router):** Estrutura de rotas e performance.
-- **TypeScript:** Segurança de tipos e tipagem de domínio.
-- **Tailwind CSS & Lucide React:** Estilização responsiva e iconografia otimizada.
+- **Next.js 16 (App Router):** estrutura de rotas e renderização moderna.
+- **React 19:** interface reativa e compatível com App Router.
+- **TypeScript:** tipagem estática para domínio e UI.
+- **Tailwind CSS v4 & Lucide React:** estilização utilitária e iconografia.
+- **next-themes:** suporte a temas no cliente.
 
-**Backend & Inteligência**
-- **Supabase:** PostgreSQL (Banco de dados) e Autenticação.
-- **FastAPI (Python):** Engine de processamento de dados e Machine Learning.
+**Backend & Integrações**
+- **Supabase:** PostgreSQL e autenticação.
 
 **Qualidade & CI/CD**
-- **Jest & React Testing Library:** Testes unitários e de integração garantindo a confiabilidade dos *Handlers* e Componentes.
-- **ESLint & SonarQube:** Análise estática de código e padronização.
-- **GitHub Actions:** Pipeline automatizada para integração contínua (CI).
+- **Jest & React Testing Library:** testes unitários e de integração para domínio, hooks e componentes.
+- **ESLint:** análise estática e padronização de código.
+- **GitHub Actions:** pipeline automatizada de integração contínua.
 
 ---
 
@@ -46,12 +46,12 @@ A aplicação foi reestruturada para separar responsabilidades, garantindo que o
 
 ```plaintext
 src/
-├── domain/ # O coração do software: Entidades, Value Objects e Contratos (Regras de negócio puras)
-├── application/ # Casos de Uso: Handlers que orquestram a leitura (Queries) e escrita (Commands) - CQRS
-├── infrastructure/ # Implementação de integrações externas (Supabase, API de IA em Python)
-├── presentation/ # Camada visual: Componentes UI, Hooks de estado (desacoplados do banco) e Estilos globais
+├── domain/ # O coração do software: Entidades, Value Objects e contratos de domínio
+├── application/ # Casos de Uso: orquestram as operações de negócio e dependem de portas abstratas
+├── infrastructure/ # Implementações de integrações externas (Supabase)
+├── presentation/ # Camada visual: componentes UI, hooks e utilitários de estado
 ├── app/ # Rotas do Next.js (App Router)
-└── proxy.ts # Middleware para proteção de rotas e gestão de sessão no lado do servidor
+└── proxy.ts # Middleware para proteção de rotas e gestão de sessão no servidor
 ```
 ---
 
@@ -60,7 +60,6 @@ src/
 ### Pré-requisitos
 
 1. Node.js (v18+ recomendado).
-2. Ambiente Python 3.10+ (para o motor de IA).
 3. Projeto configurado no Supabase.
 
 ### Instalação e Execução
@@ -85,9 +84,7 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=seu_url_do_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
-NEXT_PUBLIC_API_URL=http://localhost:8000 # URL do motor FastAPI
-NEXT_PUBLIC_AUTH_REDIRECT_URL=http://localhost:3000/auth/callback # URL de redirecionamento após login (Obrigatório para AWS/Prod)
-
+NEXT_PUBLIC_AUTH_REDIRECT_URL=http://localhost:3000/auth/callback
 ```
 
 4. Inicie o servidor de desenvolvimento:
@@ -107,21 +104,12 @@ O projeto conta com uma pipeline de Integração Contínua (CI) robusta e automa
 
 ```bash
 npm test
-
 ```
 
 **Verificar a padronização do código (Linter):**
 
 ```bash
 npm run lint
-
-```
-
-**Executar análise do SonarQube (Requer configuração local do SonarScanner):**
-
-```bash
-npm run sonar
-
 ```
 
 ---
@@ -148,7 +136,6 @@ APP_PORT=3000
 KUMA_PORT=3001
 NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
-NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_AUTH_REDIRECT_URL=http://SEU_IP_OU_DOMINIO:3000/auth/callback
 ```
 
